@@ -1,4 +1,4 @@
-defmodule TimerUi do
+defmodule TimerUI do
   @moduledoc """
   Starter application using the Scenic framework.
   """

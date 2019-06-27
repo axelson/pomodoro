@@ -1,4 +1,4 @@
-defmodule TimerUi.MixProject do
+defmodule TimerUI.MixProject do
   use Mix.Project
 
   def project do
@@ -15,7 +15,7 @@ defmodule TimerUi.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {TimerUi, []},
+      mod: {TimerUI, []},
       extra_applications: []
     ]
   end

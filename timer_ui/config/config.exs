@@ -6,7 +6,7 @@ use Mix.Config
 config :timer_ui, :viewport, %{
   name: :main_viewport,
   size: {700, 600},
-  default_scene: {TimerUi.Scene.Home, nil},
+  default_scene: {TimerUI.Scene.Home, nil},
   drivers: [
     %{
       module: Scenic.Driver.Glfw,

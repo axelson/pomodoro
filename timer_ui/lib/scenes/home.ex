@@ -1,4 +1,4 @@
-defmodule TimerUi.Scene.Home do
+defmodule TimerUI.Scene.Home do
   use Scenic.Scene
   require Logger
 
