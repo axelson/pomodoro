@@ -23,6 +23,7 @@ defmodule TimerUI.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:timer, path: "../timer"},
       {:scenic, "~> 0.10"},
       {:scenic_driver_glfw, "~> 0.10", targets: :host},
     ]
