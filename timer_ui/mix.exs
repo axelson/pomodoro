@@ -25,7 +25,7 @@ defmodule TimerUI.MixProject do
     [
       {:timer, path: "../timer"},
       {:scenic, "~> 0.10"},
-      {:scenic_driver_glfw, "~> 0.10", targets: :host},
+      {:scenic_driver_glfw, "~> 0.10", targets: :host}
     ]
   end
 end
