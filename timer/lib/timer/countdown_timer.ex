@@ -24,7 +24,12 @@ defmodule Timer.CountdownTimer do
   def init(opts) do
     tick_duration = Keyword.get(opts, :tick_duration, 1_000)
     initial_seconds = Keyword.get(opts, :initial_seconds, 60 * 25)
-    state = %State{seconds: initial_seconds, listeners: MapSet.new(), tick_duration: tick_duration}
+
+    state = %State{
+      seconds: initial_seconds,
+      listeners: MapSet.new(),
+      tick_duration: tick_duration
+    }
 
     {:ok, state}
   end
@@ -47,7 +52,13 @@ defmodule Timer.CountdownTimer do
     %State{seconds: seconds, listeners: listeners} = state
 
     state = %State{state | seconds: seconds - 1, timer_ref: nil}
-    state = schedule_tick(state)
+
+    state =
+      if state.seconds > 0 do
+        schedule_tick(state)
+      else
+        state
+      end
 
     Enum.each(listeners, fn listener -> Process.send(listener, {:tick, state.seconds}, []) end)
 

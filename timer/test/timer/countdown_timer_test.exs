@@ -32,9 +32,11 @@ defmodule Timer.CountdownTimerTest do
 
     assert {:ok, timer_pid} = CountdownTimer.start_link(opts, @name)
 
-    {:ok, task_pid} = Task.start(fn ->
-      assert_receive {:tick, _seconds}, 100
-    end)
+    {:ok, task_pid} =
+      Task.start(fn ->
+        assert_receive {:tick, _seconds}, 100
+      end)
+
     assert :ok = CountdownTimer.register(task_pid, @name)
     assert :ok = CountdownTimer.register(self(), @name)
     assert :ok = CountdownTimer.start_ticking(@name)
@@ -47,5 +49,15 @@ defmodule Timer.CountdownTimerTest do
 
     assert %{listeners: listeners} = :sys.get_state(timer_pid)
     refute MapSet.member?(listeners, task_pid)
+  end
+
+  test "stops ticking at 0" do
+    opts = [tick_duration: 10, initial_seconds: 2]
+    assert {:ok, _} = CountdownTimer.start_link(opts, @name)
+    assert :ok = CountdownTimer.register(self(), @name)
+    assert :ok = CountdownTimer.start_ticking(@name)
+    assert_receive {:tick, 1}, 100
+    assert_receive {:tick, 0}, 100
+    refute_receive {:tick, _}, 50
   end
 end
