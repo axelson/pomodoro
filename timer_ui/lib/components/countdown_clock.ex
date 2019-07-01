@@ -33,7 +33,7 @@ defmodule TimerUI.Components.CountdownClock do
     end
   end
 
-  @impl Scenic.Component
+  @impl Scenic.Scene
   def init(opts, scenic_opts) do
     initial_seconds = Keyword.get(opts, :initial_seconds, @default_initial_seconds)
     text = "Timer: #{initial_seconds}"
@@ -55,6 +55,7 @@ defmodule TimerUI.Components.CountdownClock do
     {:ok, state, push: graph}
   end
 
+  @impl Scenic.Scene
   def handle_input({:cursor_button, {:left, :press, _, _}}, _context, state) do
     %State{timer: timer} = state
     :ok = Timer.CountdownTimer.start_ticking(timer)
@@ -68,6 +69,7 @@ defmodule TimerUI.Components.CountdownClock do
     {:noreply, state}
   end
 
+  @impl Scenic.Scene
   def handle_info({:tick, seconds}, state) do
     %State{graph: graph} = state
     graph = Graph.modify(graph, :timer, &text(&1, "timer: #{seconds}", []))

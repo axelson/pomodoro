@@ -11,7 +11,7 @@ defmodule TimerUI.Scene.Home do
   @text_size 24
 
   defmodule State do
-    defstruct [:graph, :timer]
+    defstruct [:graph]
   end
 
   @impl Scenic.Scene
@@ -26,9 +26,9 @@ defmodule TimerUI.Scene.Home do
 
     graph =
       Graph.build(font: :roboto, font_size: @text_size)
-      |> TimerUI.Components.CountdownClock.add_to_graph([], id: :clock, t: {20, 400})
+      |> TimerUI.Components.CountdownClock.add_to_graph([initial_seconds: 10], id: :clock, t: {20, 400})
 
-    {:ok, %State{graph: graph, timer: timer}, push: graph}
+    {:ok, %State{graph: graph}, push: graph}
   end
 
   @impl Scenic.Scene
