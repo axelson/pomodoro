@@ -8,20 +8,13 @@ defmodule TimerUI.Scene.Home do
   import Scenic.Primitives
   # import Scenic.Components
 
-  @note """
-    This is a very simple starter application.
-
-    If you want a more full-on example, please start from:
-
-    mix scenic.new.example
-  """
-
   @text_size 24
 
-  # ============================================================================
-  # setup
+  defmodule State do
+    defstruct [:graph, :timer]
+  end
 
-  # --------------------------------------------------------
+  @impl Scenic.Scene
   def init(_, opts) do
     # get the width and height of the viewport. This is to demonstrate creating
     # a transparent full-screen rectangle to catch user input
@@ -33,18 +26,21 @@ defmodule TimerUI.Scene.Home do
 
     graph =
       Graph.build(font: :roboto, font_size: @text_size)
-      |> add_specs_to_graph([
-        text_spec("scenic: v" <> scenic_ver, translate: {20, 40}),
-        text_spec("glfw: v" <> glfw_ver, translate: {20, 40 + @text_size}),
-        text_spec(@note, translate: {20, 120}),
-        rect_spec({width, height})
-      ])
+      |> TimerUI.Components.CountdownClock.add_to_graph([], id: :clock, t: {20, 400})
 
-    {:ok, graph, push: graph}
+    {:ok, %State{graph: graph, timer: timer}, push: graph}
   end
 
+  @impl Scenic.Scene
   def handle_input(event, _context, state) do
     Logger.info("Received event: #{inspect(event)}")
+
+    {:noreply, state}
+  end
+
+  @impl Scenic.Scene
+  def handle_info(msg, state) do
+    Logger.info("Received info message: #{inspect msg}")
     {:noreply, state}
   end
 end
