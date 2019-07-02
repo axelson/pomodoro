@@ -5,10 +5,8 @@ defmodule TimerUI.Scene.Home do
   alias Scenic.Graph
   alias Scenic.ViewPort
 
-  import Scenic.Primitives
-  # import Scenic.Components
-
   @text_size 24
+  @refresh_rate round(1_000 / 30)
 
   defmodule State do
     defstruct [:graph]
@@ -30,6 +28,8 @@ defmodule TimerUI.Scene.Home do
       Graph.build(font: :roboto, font_size: @text_size)
       |> TimerUI.Components.CountdownClock.add_to_graph([initial_seconds: 10], id: :clock, t: t)
 
+    schedule_refresh()
+
     {:ok, %State{graph: graph}, push: graph}
   end
 
@@ -41,8 +41,17 @@ defmodule TimerUI.Scene.Home do
   end
 
   @impl Scenic.Scene
+  def handle_info(:refresh, state) do
+    schedule_refresh()
+    {:noreply, state, push: state.graph}
+  end
+
   def handle_info(msg, state) do
     Logger.info("Received info message: #{inspect msg}")
     {:noreply, state}
+  end
+
+  defp schedule_refresh do
+    Process.send_after(self(), :refresh, @refresh_rate)
   end
 end
