@@ -8,6 +8,7 @@ defmodule TimerUI.Components.CountdownClock do
   alias Scenic.Graph
 
   @default_initial_seconds 60 * 25
+  @font_size 80
 
   defmodule State do
     defstruct [:graph, :initial_seconds, :timer]
@@ -36,19 +37,14 @@ defmodule TimerUI.Components.CountdownClock do
   @impl Scenic.Scene
   def init(opts, scenic_opts) do
     initial_seconds = Keyword.get(opts, :initial_seconds, @default_initial_seconds)
-    text = "Timer: #{initial_seconds}"
-    font_size = 80
-
-    fm = Scenic.Cache.Static.FontMetrics.get!(:roboto)
-    width = FontMetrics.width(text, font_size, fm)
-    height = font_size
+    text = timer_text(initial_seconds)
 
     graph =
       Graph.build()
-      |> text(text, id: :timer, t: {0, 0}, text_align: :left_middle, font_size: font_size)
-      |> Scenic.Primitives.rect({width, height}, t: {0, - height / 2})
+      |> render_background(text, false)
+      |> render_text(text)
 
-    {:ok, timer} = Timer.CountdownTimer.start_link([initial_seconds: initial_seconds])
+    {:ok, timer} = Timer.CountdownTimer.start_link(initial_seconds: initial_seconds)
     Timer.CountdownTimer.register(self(), timer)
     state = %State{graph: graph, initial_seconds: initial_seconds, timer: timer}
 
@@ -57,14 +53,22 @@ defmodule TimerUI.Components.CountdownClock do
 
   @impl Scenic.Scene
   def handle_input({:cursor_button, {:left, :press, _, _}}, _context, state) do
-    %State{timer: timer} = state
+    %State{timer: timer, graph: graph, initial_seconds: initial_seconds} = state
     :ok = Timer.CountdownTimer.start_ticking(timer)
 
-    {:noreply, state}
+    text = timer_text(initial_seconds)
+
+    graph =
+      graph
+      |> Graph.modify(:background, &render_background(&1, text, true))
+
+    state = %State{state | graph: graph}
+
+    {:noreply, state, push: graph}
   end
 
   def handle_input(event, _context, state) do
-    Logger.info("UNHANDLED input in countdown clock, #{inspect event}")
+    Logger.info("UNHANDLED input in countdown clock, #{inspect(event)}")
 
     {:noreply, state}
   end
@@ -72,8 +76,42 @@ defmodule TimerUI.Components.CountdownClock do
   @impl Scenic.Scene
   def handle_info({:tick, seconds}, state) do
     %State{graph: graph} = state
-    graph = Graph.modify(graph, :timer, &text(&1, "timer: #{seconds}", []))
+
+    text = timer_text(seconds)
+
+    graph =
+      graph
+      |> Graph.modify(:background, &render_background(&1, text, true))
+      |> Graph.modify(:timer, &render_text(&1, text))
+
     state = %State{state | graph: graph}
     {:noreply, state, push: graph}
+  end
+
+  def timer_text(seconds), do: "Timer: #{seconds}"
+
+  def render_text(graph, text) do
+    graph
+    |> text(text,
+      id: :timer,
+      t: {0, 0},
+      fill: :white,
+      text_align: :center_middle,
+      font_size: @font_size
+    )
+  end
+
+  def render_background(graph, text, timer_running?) do
+    fm = Scenic.Cache.Static.FontMetrics.get!(:roboto)
+    width = FontMetrics.width(text, @font_size, fm)
+    height = @font_size
+
+    fill = if timer_running?, do: :green, else: :red
+
+    x_pos = -width / 2
+    y_pos = - @font_size / 2
+
+    graph
+    |> Scenic.Primitives.rect({width, height}, id: :background, fill: fill, t: {x_pos, y_pos})
   end
 end

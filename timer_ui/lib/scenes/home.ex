@@ -24,9 +24,11 @@ defmodule TimerUI.Scene.Home do
     scenic_ver = Application.spec(:scenic, :vsn) |> to_string()
     glfw_ver = Application.spec(:scenic, :vsn) |> to_string()
 
+    t = {width / 2, height / 2}
+
     graph =
       Graph.build(font: :roboto, font_size: @text_size)
-      |> TimerUI.Components.CountdownClock.add_to_graph([initial_seconds: 10], id: :clock, t: {20, 400})
+      |> TimerUI.Components.CountdownClock.add_to_graph([initial_seconds: 10], id: :clock, t: t)
 
     {:ok, %State{graph: graph}, push: graph}
   end
