@@ -3,6 +3,8 @@
 ## TODO
 
 - [x] Show as a clock
-- [ ] Pull in sched_ex for more accurate timer
+- [x] Add live-reload
+
+Maybe:
 - [ ] Play a bell sound when the timer finishes
-- [ ] Add live-reload
+- [ ] Pull in sched_ex for more accurate timer
