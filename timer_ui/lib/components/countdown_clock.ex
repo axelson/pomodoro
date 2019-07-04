@@ -1,6 +1,5 @@
 defmodule TimerUI.Components.CountdownClock do
-  use Scenic.Component
-  # use Scenic.Component, has_children: false
+  use Scenic.Component, has_children: false
 
   require Logger
 
@@ -64,8 +63,8 @@ defmodule TimerUI.Components.CountdownClock do
     {:noreply, state, push: graph}
   end
 
-  def handle_input(event, _context, state) do
-    Logger.info("UNHANDLED input in countdown clock, #{inspect(event)}")
+  def handle_input(_event, _context, state) do
+    # Logger.info("UNHANDLED input in countdown clock, #{inspect(event)}")
 
     {:noreply, state}
   end
