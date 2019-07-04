@@ -71,5 +71,15 @@ defimpl ScenicEntity, for: TimerUI.TimerModel do
     |> Scenic.Primitives.rect({width, height}, fill: fill, t: {x_pos, y_pos})
   end
 
-  defp timer_text(timer), do: "Timer: #{timer.seconds}"
+  defp timer_text(timer) do
+    %{seconds: total_seconds} = timer
+
+    minutes = div(total_seconds, 60)
+    seconds = rem(total_seconds, 60)
+
+    minutes_text = String.pad_leading(to_string(minutes), 2, "0")
+    seconds_text = String.pad_leading(to_string(seconds), 2, "0")
+
+    "#{minutes_text}:#{seconds_text}"
+  end
 end
