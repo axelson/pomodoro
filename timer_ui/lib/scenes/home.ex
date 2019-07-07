@@ -26,7 +26,8 @@ defmodule TimerUI.Scene.Home do
 
     graph =
       Graph.build(font: :roboto, font_size: @text_size)
-      |> TimerUI.Components.CountdownClock.add_to_graph([initial_seconds: 10], id: :clock, t: t)
+      |> TimerUI.Components.CountdownClock.add_to_graph([], id: :clock, t: t)
+      |> Launcher.HiddenHomeButton.add_to_graph([])
 
     schedule_refresh()
 
@@ -35,7 +36,7 @@ defmodule TimerUI.Scene.Home do
 
   @impl Scenic.Scene
   def handle_input(event, _context, state) do
-    Logger.info("Received event: #{inspect(event)}")
+    # Logger.info("Received event: #{inspect(event)}")
 
     {:noreply, state}
   end
@@ -47,7 +48,7 @@ defmodule TimerUI.Scene.Home do
   end
 
   def handle_info(msg, state) do
-    Logger.info("Received info message: #{inspect msg}")
+    # Logger.info("Received info message: #{inspect msg}")
     {:noreply, state}
   end
 
