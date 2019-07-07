@@ -1,4 +1,4 @@
-defmodule TimerUI.Scene.Home do
+defmodule Timer.Scene.Home do
   use Scenic.Scene
   require Logger
 
@@ -26,7 +26,7 @@ defmodule TimerUI.Scene.Home do
 
     graph =
       Graph.build(font: :roboto, font_size: @text_size)
-      |> TimerUI.Components.CountdownClock.add_to_graph([], id: :clock, t: t)
+      |> Timer.Components.CountdownClock.add_to_graph([], id: :clock, t: t)
       |> Launcher.HiddenHomeButton.add_to_graph([])
 
     schedule_refresh()

@@ -1,4 +1,4 @@
-defmodule TimerUI.TimerModel do
+defmodule Timer.TimerModel do
   defstruct [:seconds, :running?, :timer_ref]
 
   def new(initial_seconds) do
@@ -22,9 +22,9 @@ defmodule TimerUI.TimerModel do
   end
 end
 
-defimpl ScenicEntity, for: TimerUI.TimerModel do
+defimpl ScenicEntity, for: Timer.TimerModel do
   alias Scenic.Primitives
-  alias TimerUI.TimerModel
+  alias Timer.TimerModel
 
   @font_size 80
 

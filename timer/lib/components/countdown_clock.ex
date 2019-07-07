@@ -1,10 +1,10 @@
-defmodule TimerUI.Components.CountdownClock do
+defmodule Timer.Components.CountdownClock do
   use Scenic.Component, has_children: false
 
   require Logger
 
   alias Scenic.Graph
-  alias TimerUI.TimerModel
+  alias Timer.TimerModel
 
   @default_initial_seconds 60 * 25
 
