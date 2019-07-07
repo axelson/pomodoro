@@ -1,7 +1,7 @@
-defmodule Timer.CountdownTimerTest do
+defmodule TimerCore.CountdownTimerTest do
   use ExUnit.Case, async: true
 
-  alias Timer.CountdownTimer
+  alias TimerCore.CountdownTimer
 
   @name :countdown_timer_test
 

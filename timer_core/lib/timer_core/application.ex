@@ -1,4 +1,4 @@
-defmodule Timer.Application do
+defmodule TimerCore.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -7,13 +7,13 @@ defmodule Timer.Application do
 
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: Timer.Worker.start_link(arg)
-      # {Timer.Worker, arg}
+      # Starts a worker by calling: TimerCore.Worker.start_link(arg)
+      # {TimerCore.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Timer.Supervisor]
+    opts = [strategy: :one_for_one, name: TimerCore.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

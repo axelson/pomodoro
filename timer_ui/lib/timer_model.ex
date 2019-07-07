@@ -2,7 +2,7 @@ defmodule TimerUI.TimerModel do
   defstruct [:seconds, :running?, :timer_ref]
 
   def new(initial_seconds) do
-    {:ok, timer_ref} = Timer.CountdownTimer.start_link(initial_seconds: initial_seconds)
+    {:ok, timer_ref} = TimerCore.CountdownTimer.start_link(initial_seconds: initial_seconds)
     %__MODULE__{seconds: initial_seconds, running?: false, timer_ref: timer_ref}
   end
 
@@ -12,12 +12,12 @@ defmodule TimerUI.TimerModel do
   end
 
   def register_for_ticks(%__MODULE__{timer_ref: timer_ref} = timer) do
-    :ok = Timer.CountdownTimer.register(self(), timer_ref)
+    :ok = TimerCore.CountdownTimer.register(self(), timer_ref)
     timer
   end
 
   def start_ticking(%__MODULE__{timer_ref: timer_ref} = timer) do
-    :ok = Timer.CountdownTimer.start_ticking(timer_ref)
+    :ok = TimerCore.CountdownTimer.start_ticking(timer_ref)
     %__MODULE__{timer | running?: true}
   end
 end

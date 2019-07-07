@@ -1,4 +1,4 @@
-# Timer
+# TimerCore
 
 **TODO: Add description**
 

@@ -1,4 +1,4 @@
-defmodule Timer.MixProject do
+defmodule TimerCore.MixProject do
   use Mix.Project
 
   def project do
@@ -15,7 +15,7 @@ defmodule Timer.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Timer.Application, []}
+      mod: {TimerCore.Application, []}
     ]
   end
 

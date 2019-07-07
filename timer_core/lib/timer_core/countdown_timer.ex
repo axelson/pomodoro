@@ -1,4 +1,4 @@
-defmodule Timer.CountdownTimer do
+defmodule TimerCore.CountdownTimer do
   use GenServer
 
   defmodule State do
