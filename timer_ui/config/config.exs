@@ -6,7 +6,7 @@ use Mix.Config
 config :timer_ui, :viewport, %{
   name: :main_viewport,
   size: {700, 600},
-  default_scene: {TimerUi.Scene.Home, nil},
+  default_scene: {Timer.Scene.Home, nil},
   drivers: [
     %{
       module: Scenic.Driver.Glfw,
@@ -16,10 +16,11 @@ config :timer_ui, :viewport, %{
   ]
 }
 
-# It is also possible to import configuration files, relative to this
-# directory. For example, you can emulate configuration per environment
-# by uncommenting the line below and defining dev.exs, test.exs and such.
-# Configuration from the imported file will override the ones defined
-# here (which is why it is important to import them last).
-#
-#     import_config "prod.exs"
+case Mix.env() do
+  :dev ->
+    config :exsync,
+      reload_timeout: 75,
+      reload_callback: {ScenicLiveReload, :reload_current_scene, []}
+
+  _ -> nil
+end

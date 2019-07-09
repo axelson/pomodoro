@@ -10,7 +10,7 @@ by adding `timer` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:timer, "~> 0.1.0"}
+    {:timer_core, "~> 0.1.0"}
   ]
 end
 ```

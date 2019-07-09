@@ -25,6 +25,8 @@ defmodule TimerUi.MixProject do
     [
       {:scenic, "~> 0.10"},
       {:scenic_driver_glfw, "~> 0.10", targets: :host},
+      {:scenic_live_reload, path: "/home/jason/dev/scenic_live_reload", only: :dev},
+      {:timer, path: "../timer"}
     ]
   end
 end
