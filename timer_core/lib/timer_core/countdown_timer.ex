@@ -20,6 +20,10 @@ defmodule TimerCore.CountdownTimer do
     GenServer.call(name, {:start_ticking})
   end
 
+  def stop_ticking(name \\ __MODULE__) do
+    GenServer.call(name, {:stop_ticking})
+  end
+
   @impl GenServer
   def init(opts) do
     tick_duration = Keyword.get(opts, :tick_duration, 1_000)
@@ -42,23 +46,25 @@ defmodule TimerCore.CountdownTimer do
   end
 
   def handle_call({:start_ticking}, _from, state) do
-    state = schedule_tick(state)
+    state = maybe_schedule_tick(state)
 
     {:reply, :ok, state}
+  end
+
+  def handle_call({:stop_ticking}, _from, state) do
+    %State{timer_ref: timer_ref} = state
+    _ = Process.cancel_timer(timer_ref)
+
+    {:reply, :ok, %State{state | timer_ref: nil}}
   end
 
   @impl GenServer
   def handle_info(:tick, state) do
     %State{seconds: seconds, listeners: listeners} = state
 
-    state = %State{state | seconds: seconds - 1, timer_ref: nil}
-
     state =
-      if state.seconds > 0 do
-        schedule_tick(state)
-      else
-        state
-      end
+      %State{state | seconds: seconds - 1, timer_ref: nil}
+      |> maybe_schedule_tick()
 
     Enum.each(listeners, fn listener -> Process.send(listener, {:tick, state.seconds}, []) end)
 
@@ -78,7 +84,10 @@ defmodule TimerCore.CountdownTimer do
     %State{state | listeners: MapSet.delete(listeners, pid)}
   end
 
-  defp schedule_tick(%State{timer_ref: nil, tick_duration: tick_duration} = state) do
+  defp maybe_schedule_tick(%State{seconds: 0} = state), do: state
+
+  defp maybe_schedule_tick(%State{timer_ref: nil} = state) do
+    %State{tick_duration: tick_duration} = state
     timer_ref = Process.send_after(self(), :tick, tick_duration)
     %State{state | timer_ref: timer_ref}
   end

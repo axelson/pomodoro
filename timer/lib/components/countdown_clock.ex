@@ -52,7 +52,13 @@ defmodule Timer.Components.CountdownClock do
   @impl Scenic.Scene
   def handle_input({:cursor_button, {:left, :press, _, _}}, _context, state) do
     %State{timer: timer, graph: graph} = state
-    timer = TimerModel.start_ticking(timer)
+
+    timer =
+      if timer.running? do
+        TimerModel.stop_ticking(timer)
+      else
+        TimerModel.start_ticking(timer)
+      end
 
     graph =
       graph

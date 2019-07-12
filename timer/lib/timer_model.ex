@@ -20,6 +20,11 @@ defmodule Timer.TimerModel do
     :ok = TimerCore.CountdownTimer.start_ticking(timer_ref)
     %__MODULE__{timer | running?: true}
   end
+
+  def stop_ticking(%__MODULE__{timer_ref: timer_ref} = timer) do
+    :ok = TimerCore.CountdownTimer.stop_ticking(timer_ref)
+    %__MODULE__{timer | running?: false}
+  end
 end
 
 defimpl ScenicEntity, for: Timer.TimerModel do
@@ -27,6 +32,9 @@ defimpl ScenicEntity, for: Timer.TimerModel do
   alias Timer.TimerModel
 
   @font_size 80
+  @running_color :red
+  @finished_color :blue
+  @not_running_color :green
 
   def id(_), do: :timer_group
 
@@ -62,7 +70,14 @@ defimpl ScenicEntity, for: Timer.TimerModel do
     width = FontMetrics.width(text, @font_size, fm)
     height = @font_size
 
-    fill = if running?, do: :green, else: :red
+    fill = if running?, do: :red, else: :green
+
+    fill =
+      cond do
+        running? -> @running_color
+        timer.seconds <= 0 -> @finished_color
+        true -> @not_running_color
+      end
 
     x_pos = -width / 2
     y_pos = -@font_size / 2
