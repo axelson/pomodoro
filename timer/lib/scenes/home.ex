@@ -26,7 +26,7 @@ defmodule Timer.Scene.Home do
 
     graph =
       Graph.build(font: :roboto, font_size: @text_size)
-      |> Timer.Components.CountdownClock.add_to_graph([], id: :clock, t: t)
+      |> Timer.Components.CountdownClock.add_to_graph([timer_name: :countdown], id: :clock, t: t)
       |> Launcher.HiddenHomeButton.add_to_graph([])
 
     schedule_refresh()

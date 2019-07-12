@@ -9,7 +9,7 @@ defmodule Timer.Components.CountdownClock do
   @default_initial_seconds 60 * 25
 
   defmodule State do
-    defstruct [:graph, :initial_seconds, :timer]
+    defstruct [:graph, :initial_seconds, :timer, :timer_name]
   end
 
   @doc false
@@ -35,29 +35,32 @@ defmodule Timer.Components.CountdownClock do
   @impl Scenic.Scene
   def init(opts, _scenic_opts) do
     initial_seconds = Keyword.get(opts, :initial_seconds, @default_initial_seconds)
+    timer_name = Keyword.fetch!(opts, :timer_name)
 
     timer =
-      TimerModel.new(initial_seconds)
+      TimerModel.new(initial_seconds, timer_name)
       |> TimerModel.register_for_ticks()
 
     graph =
       Graph.build()
       |> ScenicRenderer.draw(timer)
 
-    state = %State{graph: graph, timer: timer}
+    state = %State{graph: graph, timer: timer, timer_name: timer_name}
 
     {:ok, state, push: graph}
   end
 
   @impl Scenic.Scene
   def handle_input({:cursor_button, {:left, :press, _, _}}, _context, state) do
-    %State{timer: timer, graph: graph} = state
+    %State{timer: timer, graph: graph, initial_seconds: initial_seconds, timer_name: timer_name} =
+      state
 
     timer =
-      if timer.running? do
-        TimerModel.stop_ticking(timer)
-      else
-        TimerModel.start_ticking(timer)
+      case timer.status do
+        :initial -> TimerModel.start_ticking(timer)
+        :running -> TimerModel.stop_ticking(timer)
+        :paused -> TimerModel.start_ticking(timer)
+        :finished -> TimerModel.new(initial_seconds, timer_name)
       end
 
     graph =
@@ -86,6 +89,20 @@ defmodule Timer.Components.CountdownClock do
       |> ScenicRenderer.draw(timer)
 
     state = %State{state | graph: graph, timer: timer}
+    {:noreply, state, push: graph}
+  end
+
+  def handle_info({:finished}, state) do
+    %State{graph: graph, timer: timer} = state
+
+    timer = TimerModel.mark_finished(timer)
+
+    graph =
+      graph
+      |> ScenicRenderer.draw(timer)
+
+    state = %State{state | graph: graph, timer: timer}
+
     {:noreply, state, push: graph}
   end
 end

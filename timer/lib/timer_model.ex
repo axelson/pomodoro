@@ -1,14 +1,21 @@
 defmodule Timer.TimerModel do
-  defstruct [:seconds, :running?, :timer_ref]
+  defstruct [:seconds, :status, :timer_ref]
 
-  def new(initial_seconds) do
-    {:ok, timer_ref} = TimerCore.CountdownTimer.start_link(initial_seconds: initial_seconds)
-    %__MODULE__{seconds: initial_seconds, running?: false, timer_ref: timer_ref}
+  @type t :: %{
+          seconds: integer,
+          status: :initial | :running | :paused | :finished,
+          timer_ref: any
+        }
+
+  def new(initial_seconds, timer_name) do
+    opts = [initial_seconds: initial_seconds]
+    {:ok, timer_ref} = TimerCore.CountdownTimer.start_link(opts, timer_name)
+
+    %__MODULE__{seconds: initial_seconds, status: :initial, timer_ref: timer_ref}
   end
 
   def tick(%__MODULE__{} = timer, seconds) do
-    running? = seconds > 0
-    %__MODULE__{timer | seconds: seconds, running?: running?}
+    %__MODULE__{timer | seconds: seconds}
   end
 
   def register_for_ticks(%__MODULE__{timer_ref: timer_ref} = timer) do
@@ -18,12 +25,18 @@ defmodule Timer.TimerModel do
 
   def start_ticking(%__MODULE__{timer_ref: timer_ref} = timer) do
     :ok = TimerCore.CountdownTimer.start_ticking(timer_ref)
-    %__MODULE__{timer | running?: true}
+    # TODO: Status should be controlled externally
+    %__MODULE__{timer | status: :running}
   end
 
   def stop_ticking(%__MODULE__{timer_ref: timer_ref} = timer) do
     :ok = TimerCore.CountdownTimer.stop_ticking(timer_ref)
-    %__MODULE__{timer | running?: false}
+    # TODO: Status should be controlled externally
+    %__MODULE__{timer | status: :paused}
+  end
+
+  def mark_finished(%__MODULE__{} = timer) do
+    %__MODULE__{timer | status: :finished}
   end
 end
 
@@ -34,7 +47,8 @@ defimpl ScenicEntity, for: Timer.TimerModel do
   @font_size 80
   @running_color :red
   @finished_color :blue
-  @not_running_color :green
+  @initial_color :green
+  @paused_color :green
 
   def id(_), do: :timer_group
 
@@ -63,20 +77,19 @@ defimpl ScenicEntity, for: Timer.TimerModel do
   end
 
   def background_render(graph, %TimerModel{} = timer) do
-    %TimerModel{running?: running?} = timer
+    %TimerModel{status: status} = timer
     text = timer_text(timer)
 
     fm = Scenic.Cache.Static.FontMetrics.get!(:roboto)
     width = FontMetrics.width(text, @font_size, fm)
     height = @font_size
 
-    fill = if running?, do: :red, else: :green
-
     fill =
-      cond do
-        running? -> @running_color
-        timer.seconds <= 0 -> @finished_color
-        true -> @not_running_color
+      case status do
+        :initial -> @initial_color
+        :running -> @running_color
+        :paused -> @paused_color
+        :finished -> @finished_color
       end
 
     x_pos = -width / 2
