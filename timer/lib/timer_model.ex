@@ -1,17 +1,22 @@
 defmodule Timer.TimerModel do
-  defstruct [:seconds, :status, :timer_ref]
+  defstruct [:seconds, :font_size, :status, :timer_ref]
 
   @type t :: %{
           seconds: integer,
           status: :initial | :running | :paused | :finished,
+          font_size: pos_integer,
           timer_ref: any
         }
 
-  def new(initial_seconds, timer_name) do
-    opts = [initial_seconds: initial_seconds]
-    {:ok, timer_ref} = TimerCore.CountdownTimer.start_link(opts, timer_name)
+  def new(timer_opts, font_size, timer_name) do
+    {:ok, timer_ref} = TimerCore.CountdownTimer.start_link(timer_opts, timer_name)
 
-    %__MODULE__{seconds: initial_seconds, status: :initial, timer_ref: timer_ref}
+    %__MODULE__{
+      seconds: timer_opts[:initial_seconds],
+      status: :initial,
+      timer_ref: timer_ref,
+      font_size: font_size
+    }
   end
 
   def tick(%__MODULE__{} = timer, seconds) do
@@ -44,7 +49,6 @@ defimpl ScenicEntity, for: Timer.TimerModel do
   alias Scenic.Primitives
   alias Timer.TimerModel
 
-  @font_size 80
   @running_color :red
   @finished_color :blue
   @initial_color :green
@@ -72,17 +76,18 @@ defimpl ScenicEntity, for: Timer.TimerModel do
       t: {0, 0},
       fill: :white,
       text_align: :center_middle,
-      font_size: @font_size
+      font_size: font_size(timer)
     )
   end
 
   def background_render(graph, %TimerModel{} = timer) do
     %TimerModel{status: status} = timer
     text = timer_text(timer)
+    font_size = font_size(timer)
 
     fm = Scenic.Cache.Static.FontMetrics.get!(:roboto)
-    width = FontMetrics.width(text, @font_size, fm)
-    height = @font_size
+    width = FontMetrics.width(text, font_size, fm)
+    height = font_size
 
     fill =
       case status do
@@ -93,11 +98,13 @@ defimpl ScenicEntity, for: Timer.TimerModel do
       end
 
     x_pos = -width / 2
-    y_pos = -@font_size / 2
+    y_pos = -font_size / 2
 
     graph
     |> Scenic.Primitives.rect({width, height}, fill: fill, t: {x_pos, y_pos})
   end
+
+  defp font_size(timer), do: timer.font_size
 
   defp timer_text(timer) do
     %{seconds: total_seconds} = timer

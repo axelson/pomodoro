@@ -14,19 +14,45 @@ defmodule Timer.Scene.Home do
 
   @impl Scenic.Scene
   def init(_, opts) do
-    # get the width and height of the viewport. This is to demonstrate creating
-    # a transparent full-screen rectangle to catch user input
     {:ok, %ViewPort.Status{size: {width, height}}} = ViewPort.info(opts[:viewport])
 
-    # show the version of scenic and the glfw driver
-    scenic_ver = Application.spec(:scenic, :vsn) |> to_string()
-    glfw_ver = Application.spec(:scenic, :vsn) |> to_string()
-
     t = {width / 2, height / 2}
+    self = self()
+
+    work_timer_opts = [
+      timer_name: :work_timer,
+      font_size: 80,
+      on_finish: fn ->
+        Process.send(:rest_timer_component, {:start_ticking}, [])
+      end,
+      timer: [
+        direction: :count_down,
+        initial_seconds: 60 * 25,
+        final_seconds: 0
+      ]
+    ]
+
+    rest_timer_opts = [
+      timer_name: :rest_timer,
+      font_size: 35,
+      # FIXME: This feels very hacky
+      on_init: fn ->
+        Process.register(self(), :rest_timer_component)
+      end,
+      timer: [
+        direction: :count_up,
+        initial_seconds: 0,
+        final_seconds: 60 * 10
+      ]
+    ]
 
     graph =
       Graph.build(font: :roboto, font_size: @text_size)
-      |> Timer.Components.CountdownClock.add_to_graph([timer_name: :countdown], id: :clock, t: t)
+      |> Timer.Components.CountdownClock.add_to_graph(work_timer_opts, id: :work_timer, t: t)
+      |> Timer.Components.CountdownClock.add_to_graph(rest_timer_opts,
+        id: :rest_timer,
+        t: {width / 2, height / 2 + height / 4}
+      )
       |> Launcher.HiddenHomeButton.add_to_graph([])
 
     schedule_refresh()

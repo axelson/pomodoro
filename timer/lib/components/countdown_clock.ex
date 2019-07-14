@@ -6,10 +6,8 @@ defmodule Timer.Components.CountdownClock do
   alias Scenic.Graph
   alias Timer.TimerModel
 
-  @default_initial_seconds 60 * 25
-
   defmodule State do
-    defstruct [:graph, :initial_seconds, :timer, :timer_name]
+    defstruct [:graph, :initial_seconds, :font_size, :timer, :timer_name, :on_finish]
   end
 
   @doc false
@@ -34,33 +32,49 @@ defmodule Timer.Components.CountdownClock do
 
   @impl Scenic.Scene
   def init(opts, _scenic_opts) do
-    initial_seconds = Keyword.get(opts, :initial_seconds, @default_initial_seconds)
+    font_size = Keyword.fetch!(opts, :font_size)
     timer_name = Keyword.fetch!(opts, :timer_name)
+    timer_opts = Keyword.fetch!(opts, :timer)
+    on_finish = Keyword.get(opts, :on_finish)
+    on_init = Keyword.get(opts, :on_init)
+
+    if on_init, do: on_init.()
 
     timer =
-      TimerModel.new(initial_seconds, timer_name)
+      TimerModel.new(timer_opts, font_size, timer_name)
       |> TimerModel.register_for_ticks()
 
     graph =
       Graph.build()
       |> ScenicRenderer.draw(timer)
 
-    state = %State{graph: graph, timer: timer, timer_name: timer_name}
+    state = %State{
+      graph: graph,
+      timer: timer,
+      timer_name: timer_name,
+      font_size: font_size,
+      on_finish: on_finish
+    }
 
     {:ok, state, push: graph}
   end
 
   @impl Scenic.Scene
   def handle_input({:cursor_button, {:left, :press, _, _}}, _context, state) do
-    %State{timer: timer, graph: graph, initial_seconds: initial_seconds, timer_name: timer_name} =
-      state
+    %State{
+      timer: timer,
+      graph: graph,
+      initial_seconds: initial_seconds,
+      timer_name: timer_name,
+      font_size: font_size
+    } = state
 
     timer =
       case timer.status do
         :initial -> TimerModel.start_ticking(timer)
         :running -> TimerModel.stop_ticking(timer)
         :paused -> TimerModel.start_ticking(timer)
-        :finished -> TimerModel.new(initial_seconds, timer_name)
+        :finished -> TimerModel.new(initial_seconds, font_size, timer_name)
       end
 
     graph =
@@ -92,10 +106,26 @@ defmodule Timer.Components.CountdownClock do
     {:noreply, state, push: graph}
   end
 
+  def handle_info({:start_ticking}, state) do
+    %State{timer: timer, graph: graph} = state
+    timer = TimerModel.start_ticking(timer)
+
+    graph =
+      graph
+      |> ScenicRenderer.draw(timer)
+
+    state = %State{state | timer: timer, graph: graph}
+    {:noreply, state, push: graph}
+  end
+
   def handle_info({:finished}, state) do
     %State{graph: graph, timer: timer} = state
 
     timer = TimerModel.mark_finished(timer)
+
+    if state.on_finish do
+      state.on_finish.()
+    end
 
     graph =
       graph
@@ -104,5 +134,10 @@ defmodule Timer.Components.CountdownClock do
     state = %State{state | graph: graph, timer: timer}
 
     {:noreply, state, push: graph}
+  end
+
+  def handle_info(msg, state) do
+    IO.warn(msg, label: "UNHANDLED msg")
+    {:noreply, state}
   end
 end
