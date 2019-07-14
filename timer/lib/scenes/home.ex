@@ -23,7 +23,7 @@ defmodule Timer.Scene.Home do
       timer_name: :work_timer,
       font_size: 80,
       on_finish: fn ->
-        Process.send(:rest_timer_component, {:start_ticking}, [])
+        Process.send(self, {:start_rest_timer, opts[:viewport]}, [])
       end,
       timer: [
         direction: :count_down,
@@ -32,27 +32,9 @@ defmodule Timer.Scene.Home do
       ]
     ]
 
-    rest_timer_opts = [
-      timer_name: :rest_timer,
-      font_size: 35,
-      # FIXME: This feels very hacky
-      on_init: fn ->
-        Process.register(self(), :rest_timer_component)
-      end,
-      timer: [
-        direction: :count_up,
-        initial_seconds: 0,
-        final_seconds: 60 * 10
-      ]
-    ]
-
     graph =
       Graph.build(font: :roboto, font_size: @text_size)
       |> Timer.Components.CountdownClock.add_to_graph(work_timer_opts, id: :work_timer, t: t)
-      |> Timer.Components.CountdownClock.add_to_graph(rest_timer_opts,
-        id: :rest_timer,
-        t: {width / 2, height / 2 + height / 4}
-      )
       |> Launcher.HiddenHomeButton.add_to_graph([])
 
     schedule_refresh()
@@ -71,6 +53,33 @@ defmodule Timer.Scene.Home do
   def handle_info(:refresh, state) do
     schedule_refresh()
     {:noreply, state, push: state.graph}
+  end
+
+  def handle_info({:start_rest_timer, viewport}, state) do
+    %State{graph: graph} = state
+    {:ok, %ViewPort.Status{size: {width, height}}} = ViewPort.info(viewport)
+
+    rest_timer_opts = [
+      timer_name: :rest_timer,
+      font_size: 35,
+      start_immediately: true,
+      timer: [
+        direction: :count_up,
+        initial_seconds: 0,
+        final_seconds: 60 * 10
+      ]
+    ]
+
+    graph =
+      graph
+      |> Timer.Components.CountdownClock.add_to_graph(rest_timer_opts,
+        id: :rest_timer,
+        t: {width / 2, height / 2 + height / 4}
+      )
+
+    state = %State{state | graph: graph}
+
+    {:noreply, state, push: graph}
   end
 
   def handle_info(msg, state) do

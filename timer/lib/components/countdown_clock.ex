@@ -37,8 +37,10 @@ defmodule Timer.Components.CountdownClock do
     timer_opts = Keyword.fetch!(opts, :timer)
     on_finish = Keyword.get(opts, :on_finish)
     on_init = Keyword.get(opts, :on_init)
+    start_immediately = Keyword.get(opts, :start_immediately, false)
 
     if on_init, do: on_init.()
+    if start_immediately, do: Process.send(self(), {:start_ticking}, [])
 
     timer =
       TimerModel.new(timer_opts, font_size, timer_name)
