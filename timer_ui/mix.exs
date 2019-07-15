@@ -23,6 +23,9 @@ defmodule TimerUi.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
+      {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test]},
       {:scenic, "~> 0.10"},
       {:scenic_driver_glfw, "~> 0.10", targets: :host},
       {:scenic_live_reload, path: "/home/jason/dev/scenic_live_reload", only: :dev},
