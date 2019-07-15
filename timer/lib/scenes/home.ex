@@ -35,6 +35,7 @@ defmodule Timer.Scene.Home do
     graph =
       Graph.build(font: :roboto, font_size: @text_size)
       |> Timer.Components.CountdownClock.add_to_graph(work_timer_opts, id: :work_timer, t: t)
+      |> Scenic.Components.button("Reset", id: :btn_reset, t: {10, 10}, button_font_size: 30)
       |> Launcher.HiddenHomeButton.add_to_graph([])
 
     schedule_refresh()
@@ -85,6 +86,17 @@ defmodule Timer.Scene.Home do
   def handle_info(_msg, state) do
     # Logger.info("Received info message: #{inspect msg}")
     {:noreply, state}
+  end
+
+  @impl Scenic.Scene
+  def filter_event({:click, :btn_reset}, _from, state) do
+    reset_timers()
+    {:halt, state}
+  end
+
+  defp reset_timers do
+    # A lazy(?) way to reset the scene
+    Process.exit(self(), :kill)
   end
 
   defp schedule_refresh do
