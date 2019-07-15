@@ -43,7 +43,7 @@ defmodule Timer.Scene.Home do
   end
 
   @impl Scenic.Scene
-  def handle_input(event, _context, state) do
+  def handle_input(_event, _context, state) do
     # Logger.info("Received event: #{inspect(event)}")
 
     {:noreply, state}
@@ -82,7 +82,7 @@ defmodule Timer.Scene.Home do
     {:noreply, state, push: graph}
   end
 
-  def handle_info(msg, state) do
+  def handle_info(_msg, state) do
     # Logger.info("Received info message: #{inspect msg}")
     {:noreply, state}
   end

@@ -106,10 +106,7 @@ defmodule TimerCore.CountdownTimer do
     notify(state, {:tick, seconds})
   end
 
-  defp notify_finished(state) do
-    %State{seconds: seconds} = state
-    notify(state, {:finished})
-  end
+  defp notify_finished(state), do: notify(state, {:finished})
 
   defp notify(state, message) do
     %State{listeners: listeners} = state
