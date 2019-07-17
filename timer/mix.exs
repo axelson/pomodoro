@@ -25,7 +25,11 @@ defmodule Timer.MixProject do
     [
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
+      {:httpoison, "~> 1.5"},
       {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test]},
+      {:jason, "~> 1.1"},
+      # Pin until this is fixed: https://github.com/BlakeWilliams/Elixir-Slack/issues/181
+      {:slack, github: "BlakeWilliams/Elixir-Slack", ref: "4812cf8"},
       {:launcher, path: "../../launcher"},
       {:scenic, "~> 0.10"},
       {:timer_core, path: "../timer_core"}
