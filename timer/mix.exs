@@ -30,9 +30,12 @@ defmodule Timer.MixProject do
       {:jason, "~> 1.1"},
       # Pin until this is fixed: https://github.com/BlakeWilliams/Elixir-Slack/issues/181
       {:slack, github: "BlakeWilliams/Elixir-Slack", ref: "4812cf8"},
-      {:launcher, path: "../../launcher"},
+      dep(:launcher, :github),
       {:scenic, "~> 0.10"},
       {:timer_core, path: "../timer_core"}
     ]
   end
+
+  defp dep(:launcher, :path), do: {:launcher, path: "../../launcher"}
+  defp dep(:launcher, :github), do: {:launcher, github: "axelson/scenic_launcher"}
 end
