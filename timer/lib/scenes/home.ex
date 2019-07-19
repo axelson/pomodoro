@@ -27,7 +27,7 @@ defmodule Timer.Scene.Home do
       end,
       timer: [
         direction: :count_down,
-        initial_seconds: 60 * 25,
+        initial_seconds: 60 * 30,
         final_seconds: 0
       ]
     ]
