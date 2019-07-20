@@ -16,7 +16,11 @@ defmodule Timer.MixProject do
   def application do
     [
       mod: {Timer, []},
-      extra_applications: []
+      extra_applications: [
+        # Workaround Elixir-Slack issue:
+        # https://github.com/BlakeWilliams/Elixir-Slack/pull/196
+        :poison
+      ]
     ]
   end
 
