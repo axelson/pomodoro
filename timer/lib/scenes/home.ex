@@ -18,16 +18,21 @@ defmodule Timer.Scene.Home do
 
     t = {width / 2, height / 2}
     self = self()
+    work_minutes = 30
+    work_seconds = work_minutes * 60
 
     work_timer_opts = [
       timer_name: :work_timer,
       font_size: 80,
+      on_start: fn ->
+        set_pomodoro_slack_status(work_minutes)
+      end,
       on_finish: fn ->
         Process.send(self, {:start_rest_timer, opts[:viewport]}, [])
       end,
       timer: [
         direction: :count_down,
-        initial_seconds: 60 * 30,
+        initial_seconds: work_seconds,
         final_seconds: 0
       ]
     ]
@@ -36,7 +41,7 @@ defmodule Timer.Scene.Home do
       Graph.build(font: :roboto, font_size: @text_size)
       |> Timer.Components.CountdownClock.add_to_graph(work_timer_opts, id: :work_timer, t: t)
       |> Scenic.Components.button("Reset", id: :btn_reset, t: {10, 10}, button_font_size: 30)
-      |> Launcher.HiddenHomeButton.add_to_graph([])
+      |> Launcher.HiddenHomeButton.add_to_graph(on_switch: &clear_pomodoro_slack_status/0)
 
     schedule_refresh()
 
@@ -80,6 +85,8 @@ defmodule Timer.Scene.Home do
 
     state = %State{state | graph: graph}
 
+    clear_pomodoro_slack_status()
+
     {:noreply, state, push: graph}
   end
 
@@ -90,16 +97,31 @@ defmodule Timer.Scene.Home do
 
   @impl Scenic.Scene
   def filter_event({:click, :btn_reset}, _from, state) do
-    reset_timers()
+    reset_scene()
     {:halt, state}
   end
 
-  defp reset_timers do
+  defp reset_scene do
+    clear_pomodoro_slack_status()
     # A lazy(?) way to reset the scene
     Process.exit(self(), :kill)
   end
 
   defp schedule_refresh do
     Process.send_after(self(), :refresh, @refresh_rate)
+  end
+
+  defp set_pomodoro_slack_status(minutes) do
+    Task.start(fn ->
+      Timer.SlackControls.enable_dnd(minutes)
+      Timer.SlackControls.set_status("mid-pomodoro", ":tomato:", duration_minutes: minutes)
+    end)
+  end
+
+  defp clear_pomodoro_slack_status do
+    Task.start(fn ->
+      Timer.SlackControls.disable_dnd()
+      Timer.SlackControls.clear_status()
+    end)
   end
 end

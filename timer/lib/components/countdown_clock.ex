@@ -7,7 +7,7 @@ defmodule Timer.Components.CountdownClock do
   alias Timer.TimerModel
 
   defmodule State do
-    defstruct [:graph, :initial_seconds, :font_size, :timer, :timer_name, :on_finish]
+    defstruct [:graph, :initial_seconds, :font_size, :timer, :timer_name, :on_start, :on_finish]
   end
 
   @doc false
@@ -37,6 +37,8 @@ defmodule Timer.Components.CountdownClock do
     timer_opts = Keyword.fetch!(opts, :timer)
     on_finish = Keyword.get(opts, :on_finish)
     on_init = Keyword.get(opts, :on_init)
+    on_start = Keyword.get(opts, :on_start)
+
     start_immediately = Keyword.get(opts, :start_immediately, false)
 
     if on_init, do: on_init.()
@@ -55,6 +57,7 @@ defmodule Timer.Components.CountdownClock do
       timer: timer,
       timer_name: timer_name,
       font_size: font_size,
+      on_start: on_start,
       on_finish: on_finish
     }
 
@@ -70,6 +73,11 @@ defmodule Timer.Components.CountdownClock do
       timer_name: timer_name,
       font_size: font_size
     } = state
+
+    # FIXME: This needs a bunch of refactoring
+    if timer.status == :initial && state.on_start do
+      state.on_start.()
+    end
 
     timer =
       case timer.status do
@@ -117,6 +125,11 @@ defmodule Timer.Components.CountdownClock do
       |> ScenicRenderer.draw(timer)
 
     state = %State{state | timer: timer, graph: graph}
+
+    if state.on_start do
+      state.on_start.()
+    end
+
     {:noreply, state, push: graph}
   end
 
