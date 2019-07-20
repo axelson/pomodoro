@@ -1,4 +1,13 @@
 defmodule Timer.SlackControls do
+  @moduledoc """
+  Provides an interface to set and clear the user's do not disturb and status
+  text.
+
+  Requires the following slack permission scopes:
+  * `dnd:write` - For updating the user's do not disturb settings
+  * `users.profile:write` - For updating the user's status text
+  """
+
   @token System.fetch_env!("SLACK_TOKEN")
 
   # DND
@@ -67,12 +76,8 @@ defmodule Timer.SlackControls do
     case HTTPoison.post(uri, "") do
       {:ok, %HTTPoison.Response{status_code: 200} = resp} ->
         case Jason.decode(resp.body) do
-          {:ok, %{"ok" => true} = result} ->
-            IO.inspect(result, label: "result")
-            :ok
-
-          {:ok, %{"error" => error_text}} ->
-            {:error, error_text}
+          {:ok, %{"ok" => true} = result} -> :ok
+          {:ok, %{"error" => error_text}} -> {:error, error_text}
         end
 
       {:error, _} ->

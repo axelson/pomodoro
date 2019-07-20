@@ -9,6 +9,7 @@
   - This is in the vein of the thought "scenic is not your app"
   - Should also pave the way for an html rendering of the same timer
 - [ ] Provide a toggle to select if slack status will be updated
+- [ ] Don't compile the SLACK_TOKEN into the code, instead read it from a secrets file
 
 Maybe:
 - [ ] Play a bell sound when the timer finishes
