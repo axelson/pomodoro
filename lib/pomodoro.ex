@@ -3,6 +3,8 @@ defmodule Pomodoro do
   Documentation for Pomodoro.
   """
 
+  use Boundary, deps: [], exports: []
+
   @doc """
   Hello world.
 
