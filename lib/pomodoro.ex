@@ -1,6 +1,6 @@
-defmodule TimerCore do
+defmodule Pomodoro do
   @moduledoc """
-  Documentation for TimerCore.
+  Documentation for Pomodoro.
   """
 
   @doc """
@@ -8,7 +8,7 @@ defmodule TimerCore do
 
   ## Examples
 
-      iex> TimerCore.hello()
+      iex> Pomodoro.hello()
       :world
 
   """

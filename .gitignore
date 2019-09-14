@@ -20,11 +20,5 @@ erl_crash.dump
 *.ez
 
 # Ignore package tarball (built via "mix hex.build").
-foo-*.tar
+pomodoro-*.tar
 
-
-# Ignore scripts marked as secret - usually passwords and such in config files
-*.secret.exs
-*.secrets.exs
-
-.env
