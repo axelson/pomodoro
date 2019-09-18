@@ -5,6 +5,7 @@
 - [x] Show as a clock
 - [x] Add live-reload
 - [x] Add slack controls
+- [ ] Re-add launcher
 - [ ] Extract out a pomodoro module somewhere (timer_core?) (or just remove timer_core?)
   - This is in the vein of the thought "scenic is not your app"
   - Should also pave the way for an html rendering of the same timer

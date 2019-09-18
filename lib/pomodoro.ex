@@ -3,7 +3,7 @@ defmodule Pomodoro do
   Documentation for Pomodoro.
   """
 
-  use Boundary, deps: [], exports: []
+  use Boundary, deps: [], exports: [PomodoroTimer]
 
   @doc """
   Hello world.

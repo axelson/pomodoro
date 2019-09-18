@@ -3,5 +3,15 @@ defmodule PomodoroUi do
   Base of scenic ui
   """
 
-  use Boundary, deps: [Pomodoro]
+  use Boundary, deps: [Pomodoro, ScenicEntity, ScenicRenderer], exports: []
+
+  def start(_type, _args) do
+    main_viewport_config = Application.get_env(:pomodoro, :viewport)
+
+    children = [
+      {Scenic, viewports: [main_viewport_config]}
+    ]
+
+    Supervisor.start_link(children, strategy: :one_for_one)
+  end
 end
