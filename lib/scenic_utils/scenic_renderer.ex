@@ -1,9 +1,9 @@
-defmodule ScenicRenderer do
-  use Boundary, deps: [ScenicEntity], exports: []
-
+defmodule ScenicUtils.ScenicRenderer do
   @moduledoc """
   Oversee the rendering of entities on a graph
   """
+
+  # use Boundary, deps: [ScenicEntity], exports: [__MODULE__]
 
   alias Scenic.Graph
 
@@ -13,21 +13,27 @@ defmodule ScenicRenderer do
   end
 
   def draw(graph, entity) do
-    id = ScenicEntity.id(entity)
+    IO.puts("before id!")
+    IO.inspect(ScenicUtils.ScenicEntity, label: "ScenicUtils.ScenicEntity")
+    functions = ScenicUtils.ScenicEntity.__info__(:functions)
+    IO.inspect(functions, label: "functions")
+    IO.inspect(entity, label: "entity")
+    id = ScenicUtils.ScenicEntity.id(entity)
+    IO.inspect(id, label: "id")
 
     case Graph.get(graph, id) do
       [] ->
-        ScenicEntity.draw(entity, graph)
+        ScenicUtils.ScenicEntity.draw(entity, graph)
 
       # Work around not being able to modify a group primitive
       # Bug: https://github.com/boydm/scenic/issues/27
       [%{module: Scenic.Primitive.Group}] ->
         graph = Graph.delete(graph, id)
-        ScenicEntity.draw(entity, graph)
+        ScenicUtils.ScenicEntity.draw(entity, graph)
 
       [_] ->
         Graph.modify(graph, id, fn graph ->
-          ScenicEntity.draw(entity, graph)
+          ScenicUtils.ScenicEntity.draw(entity, graph)
         end)
     end
   end

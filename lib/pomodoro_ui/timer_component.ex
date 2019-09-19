@@ -39,7 +39,7 @@ defmodule PomodoroUi.TimerComponent do
 
     graph =
       Graph.build()
-      |> ScenicRenderer.draw(pomodoro_timer)
+      |> ScenicUtils.ScenicRenderer.draw(pomodoro_timer)
 
     state = %State{
       graph: graph,
@@ -64,20 +64,20 @@ defmodule PomodoroUi.TimerComponent do
       :finished -> PomodoroTimer.start_ticking()
     end
 
-    graph = ScenicRenderer.draw(graph, pomodoro_timer)
+    graph = ScenicUtils.ScenicRenderer.draw(graph, pomodoro_timer)
     {:noreply, state, push: graph}
   end
 
   @impl Scenic.Scene
   def handle_info({:tick, pomodoro_timer}, state) do
     %State{graph: graph} = state
-    graph = ScenicRenderer.draw(graph, pomodoro_timer)
+    graph = ScenicUtils.ScenicRenderer.draw(graph, pomodoro_timer)
     state = %State{state | pomodoro_timer: pomodoro_timer, graph: graph}
     {:noreply, state, push: graph}
   end
 end
 
-defimpl ScenicEntity, for: PomodoroUi.TimerComponent do
+defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
   alias Scenic.Primitives
   alias Pomodoro.PomodoroTimer
 
