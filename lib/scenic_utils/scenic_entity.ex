@@ -1,6 +1,4 @@
 defprotocol ScenicUtils.ScenicEntity do
-  # use Boundary, deps: [], exports: [__MODULE__]
-
   @type id :: atom
 
   @typedoc "Any entity that can be drawn onto the graph"

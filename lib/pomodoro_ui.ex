@@ -2,8 +2,7 @@ defmodule PomodoroUi do
   @moduledoc """
   Base of scenic ui
   """
-
-  # use Boundary, deps: [Pomodoro, ScenicEntity, ScenicRenderer], exports: []
+  use Boundary, deps: [Pomodoro, ScenicUtils], exports: []
 
   def start(_type, _args) do
     main_viewport_config = Application.get_env(:pomodoro, :viewport)

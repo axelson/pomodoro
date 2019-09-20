@@ -3,8 +3,6 @@ defmodule ScenicUtils.ScenicRenderer do
   Oversee the rendering of entities on a graph
   """
 
-  # use Boundary, deps: [ScenicEntity], exports: [__MODULE__]
-
   alias Scenic.Graph
 
   @spec draw(ScenicEntity.entity(), Scenic.Graph.t()) :: Scenic.Graph.t()
