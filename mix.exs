@@ -24,15 +24,17 @@ defmodule Pomodoro.MixProject do
   defp deps do
     [
       dep(:boundary, :github),
-      # {:dialyxir, "~> 1.0.0-rc.4", only: [:dev, :test], runtime: false},
-      {:exsync, "~> 0.2", only: :dev},
+      {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false},
       {:sched_ex, "~> 1.1"},
-      {:scenic, "~> 0.10"},
-      {:scenic_driver_glfw, "~> 0.10"}
-      # scenic_live_reload
+      dep(:scenic, :path),
+      {:scenic_driver_glfw, "~> 0.10"},
+      {:scenic_live_reload, "~> 0.1.0"}
     ]
   end
 
-  defp dep(:boundary, :path), do: {:boundary, path: "../forks/boundary"}
   defp dep(:boundary, :github), do: {:boundary, github: "sasa1977/boundary"}
+  defp dep(:boundary, :path), do: {:boundary, path: "../forks/boundary"}
+
+  defp dep(:scenic, :hex), do: {:scenic, "~> 0.10"}
+  defp dep(:scenic, :path), do: {:scenic, path: "../forks/scenic", override: true}
 end

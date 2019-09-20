@@ -36,6 +36,7 @@ defmodule PomodoroUi.TimerComponent do
   @impl Scenic.Scene
   def init(opts, _scenic_opts) do
     pomodoro_timer = Keyword.fetch!(opts, :pomodoro_timer)
+    PomodoroTimer.register(self())
 
     graph =
       Graph.build()
@@ -66,6 +67,11 @@ defmodule PomodoroUi.TimerComponent do
 
     graph = ScenicUtils.ScenicRenderer.draw(graph, pomodoro_timer)
     {:noreply, state, push: graph}
+  end
+
+  def handle_input(_input, _context, state) do
+    # IO.warn("Unhandled input!: #{inspect(input)}")
+    {:noreply, state}
   end
 
   @impl Scenic.Scene

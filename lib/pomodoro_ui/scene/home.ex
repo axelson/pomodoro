@@ -18,7 +18,8 @@ defmodule PomodoroUi.Scene.Home do
     t = {width / 2, height / 2}
 
     # instantiate a timer
-    pomodoro_timer = PomodoroTimer.new()
+    PomodoroTimer.start_link([])
+    pomodoro_timer = PomodoroTimer.get_timer()
 
     # insantiate a timer component
     graph =

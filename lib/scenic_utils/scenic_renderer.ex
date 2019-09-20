@@ -5,19 +5,13 @@ defmodule ScenicUtils.ScenicRenderer do
 
   alias Scenic.Graph
 
-  @spec draw(ScenicEntity.entity(), Scenic.Graph.t()) :: Scenic.Graph.t()
-  def draw({:delete, id}, graph) do
+  @spec draw(Scenic.Graph.t(), ScenicUtils.ScenicEntity.entity()) :: Scenic.Graph.t()
+  def draw(graph, {:delete, id}) do
     Graph.delete(graph, id)
   end
 
   def draw(graph, entity) do
-    IO.puts("before id!")
-    IO.inspect(ScenicUtils.ScenicEntity, label: "ScenicUtils.ScenicEntity")
-    functions = ScenicUtils.ScenicEntity.__info__(:functions)
-    IO.inspect(functions, label: "functions")
-    IO.inspect(entity, label: "entity")
     id = ScenicUtils.ScenicEntity.id(entity)
-    IO.inspect(id, label: "id")
 
     case Graph.get(graph, id) do
       [] ->
