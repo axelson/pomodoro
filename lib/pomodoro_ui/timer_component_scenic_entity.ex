@@ -56,8 +56,10 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
   defp background_color(:resting), do: :blue
   defp background_color(:finished), do: :purple
 
-  defp timer_text(pomodoro_timer) do
+  def timer_text(pomodoro_timer) do
     %PomodoroTimer{seconds_remaining: seconds_remaining} = pomodoro_timer
+
+    seconds_remaining = normalize_seconds_remaining(seconds_remaining)
 
     minutes = div(seconds_remaining, 60)
     seconds = rem(seconds_remaining, 60)
@@ -67,4 +69,7 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
 
     "#{minutes_text}:#{seconds_text}"
   end
+
+  defp normalize_seconds_remaining(nil), do: 0
+  defp normalize_seconds_remaining(seconds), do: abs(seconds)
 end
