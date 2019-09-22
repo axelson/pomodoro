@@ -75,7 +75,7 @@ defmodule PomodoroUi.TimerComponent do
   end
 
   @impl Scenic.Scene
-  def handle_info({:tick, pomodoro_timer}, state) do
+  def handle_info({:pomodoro_timer, pomodoro_timer}, state) do
     %State{graph: graph} = state
     graph = ScenicUtils.ScenicRenderer.draw(graph, pomodoro_timer)
     state = %State{state | pomodoro_timer: pomodoro_timer, graph: graph}

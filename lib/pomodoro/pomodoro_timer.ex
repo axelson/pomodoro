@@ -95,6 +95,7 @@ defmodule Pomodoro.PomodoroTimer do
       end
 
     state = %State{state | timer: timer}
+    notify_update(state)
     maybe_schedule_tick(state)
     {:reply, :ok, state}
   end
@@ -102,13 +103,14 @@ defmodule Pomodoro.PomodoroTimer do
   def handle_call(:pause, _from, state) do
     %State{timer_ref: timer_ref} = state
     Process.cancel_timer(timer_ref)
-    notify_paused(state)
+    notify_update(state)
     state = %State{state | timer_ref: nil}
     {:reply, :ok, state}
   end
 
   @impl GenServer
   def handle_info(:tick, state) do
+    IO.puts("tick")
     state = tick_and_notify(state)
 
     state =
@@ -138,35 +140,26 @@ defmodule Pomodoro.PomodoroTimer do
       max_rest_seconds: max_rest_seconds
     } = timer
 
-    # TODO: Should we get rid of other notifications besides one (maybe renaming
-    # it from tick to update)
     timer =
       cond do
         seconds_remaining == 0 ->
-          notify_finished(state)
-          notify_tick(state)
           %__MODULE__{timer | status: :resting}
 
         seconds_remaining == -max_rest_seconds ->
-          notify_rest_finished(state)
-          notify_tick(state)
           %__MODULE__{timer | status: :finished}
 
         true ->
-          notify_tick(state)
           timer
       end
 
-    %State{state | timer: timer}
+    state = %State{state | timer: timer}
+    notify_update(state)
+    state
   end
 
-  defp notify_tick(state), do: notify(state, {:tick, state.timer})
-  defp notify_paused(state), do: notify(state, :paused)
-  defp notify_finished(state), do: notify(state, :finished)
-  defp notify_rest_finished(state), do: notify(state, :rest_finished)
-
-  defp notify(state, message) do
-    %State{listeners: listeners} = state
+  defp notify_update(state) do
+    %State{listeners: listeners, timer: timer} = state
+    message = {:pomodoro_timer, timer}
     Enum.each(listeners, &Process.send(&1, message, []))
   end
 
