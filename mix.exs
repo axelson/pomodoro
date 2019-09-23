@@ -24,6 +24,7 @@ defmodule Pomodoro.MixProject do
   defp deps do
     [
       dep(:boundary, :github),
+      dep(:cortex, :path),
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false},
       {:sched_ex, "~> 1.1"},
       dep(:scenic, :path),
@@ -37,4 +38,7 @@ defmodule Pomodoro.MixProject do
 
   defp dep(:scenic, :hex), do: {:scenic, "~> 0.10"}
   defp dep(:scenic, :path), do: {:scenic, path: "../forks/scenic", override: true}
+
+  defp dep(:cortex, :path), do: {:cortex, path: "../forks/cortex", only: [:dev, :test]}
+  defp dep(:cortex, :hex), do: {:cortex, "~> 0.5", only: [:dev, :test]}
 end
