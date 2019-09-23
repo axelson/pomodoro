@@ -26,10 +26,13 @@ defmodule Pomodoro.MixProject do
       dep(:boundary, :github),
       dep(:cortex, :path),
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false},
+      {:jason, "~> 1.1"},
+      {:httpoison, "~> 1.5"},
       {:sched_ex, "~> 1.1"},
       dep(:scenic, :path),
       {:scenic_driver_glfw, "~> 0.10"},
-      {:scenic_live_reload, "~> 0.1.0"}
+      {:scenic_live_reload, "~> 0.1.0"},
+      {:slack, "~> 0.19"}
     ]
   end
 

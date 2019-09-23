@@ -121,6 +121,7 @@ defmodule Pomodoro.PomodoroTimer do
 
     state = %State{state | timer: timer}
     notify_update(state)
+    update_slack_status(timer)
     state = maybe_schedule_tick(state)
     {:reply, :ok, state}
   end
@@ -139,6 +140,7 @@ defmodule Pomodoro.PomodoroTimer do
     timer = %__MODULE__{timer | status: new_status}
     state = %State{state | timer_ref: nil, timer: timer}
     notify_update(state)
+    update_slack_status(timer)
     {:reply, :ok, state}
   end
 
@@ -154,6 +156,7 @@ defmodule Pomodoro.PomodoroTimer do
       |> maybe_schedule_tick()
 
     notify_update(state)
+    update_slack_status(timer)
     {:reply, :ok, state}
   end
 
@@ -162,6 +165,7 @@ defmodule Pomodoro.PomodoroTimer do
     timer = new(opts)
     state = %State{state | timer: timer}
     notify_update(state)
+    update_slack_status(timer)
     {:reply, :ok, state}
   end
 
@@ -240,6 +244,35 @@ defmodule Pomodoro.PomodoroTimer do
     else
       state
     end
+  end
+
+  defp update_slack_status(timer) do
+    %__MODULE__{status: status, seconds_remaining: seconds_remaining} = timer
+
+    case status do
+      :initial -> clear_slack_status()
+      :running -> set_slack_status(seconds_remaining)
+      :running_paused -> clear_slack_status()
+      :limbo -> nil
+      :resting -> clear_slack_status()
+      :resting_paused -> nil
+      :finished -> clear_slack_status()
+    end
+  end
+
+  defp set_slack_status(seconds_remaining) do
+    Task.start(fn ->
+      minutes = ceil(seconds_remaining / 60)
+      Pomodoro.SlackControls.enable_dnd(minutes)
+      Pomodoro.SlackControls.set_status("mid-pomodoro", ":tomato:", duration_minutes: minutes)
+    end)
+  end
+
+  defp clear_slack_status do
+    Task.start(fn ->
+      Pomodoro.SlackControls.disable_dnd()
+      Pomodoro.SlackControls.clear_status()
+    end)
   end
 
   @spec tick?(status) :: boolean
