@@ -17,7 +17,7 @@ defmodule PomodoroUi.TimerComponent do
   @impl Scenic.Component
   def info(data) do
     """
-    #{IO.ANSI.red()}Clock data must be a keyword list
+    #{IO.ANSI.red()}Timer data must be a keyword list
     #{IO.ANSI.yellow()}Received: #{inspect(data)}
     #{IO.ANSI.default_color()}
     """
@@ -58,9 +58,10 @@ defmodule PomodoroUi.TimerComponent do
     case status do
       :initial -> PomodoroTimer.start_ticking()
       :running -> PomodoroTimer.pause()
-      :paused -> PomodoroTimer.start_ticking()
-      # TODO: Implement a built-in reset, or perhaps a non-automatic rest mode (which would be triggered with a start_rest)
-      :resting -> PomodoroTimer.start_ticking()
+      :running_paused -> PomodoroTimer.start_ticking()
+      :limbo -> nil
+      :resting -> PomodoroTimer.pause()
+      :resting_paused -> PomodoroTimer.start_ticking()
       # TODO: This actually causes an exception...
       :finished -> PomodoroTimer.start_ticking()
     end

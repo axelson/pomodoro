@@ -1,5 +1,6 @@
 defmodule PomodoroUi.Scene.Home do
   use Scenic.Scene
+  require Logger
 
   alias Pomodoro.PomodoroTimer
   alias Scenic.Graph
@@ -8,7 +9,7 @@ defmodule PomodoroUi.Scene.Home do
   @refresh_rate round(1_000 / 30)
 
   defmodule State do
-    defstruct [:graph]
+    defstruct [:graph, :pomodoro_timer_pid]
   end
 
   @impl Scenic.Scene
@@ -18,18 +19,19 @@ defmodule PomodoroUi.Scene.Home do
     t = {width / 2, height / 2}
 
     # instantiate a timer
-    PomodoroTimer.start_link([])
+    {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link([])
     pomodoro_timer = PomodoroTimer.get_timer()
 
     # insantiate a timer component
     graph =
       Graph.build(font: :roboto)
       |> PomodoroUi.TimerComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
-      |> Scenic.Components.button("Reset", id: :btn_reset, t: {10, 10}, button_font_size: 30)
+      |> PomodoroUi.RestButtonComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
+      |> Scenic.Components.button("Reset", id: :btn_reset, t: {10, 10}, button_font_size: 40)
 
     schedule_refresh()
 
-    {:ok, %State{graph: graph}, push: graph}
+    {:ok, %State{graph: graph, pomodoro_timer_pid: pomodoro_timer_pid}, push: graph}
   end
 
   @impl Scenic.Scene
@@ -37,6 +39,24 @@ defmodule PomodoroUi.Scene.Home do
     %State{graph: graph} = state
     schedule_refresh()
     {:noreply, state, push: graph}
+  end
+
+  @impl Scenic.Scene
+  def filter_event({:click, :btn_reset}, _from, state) do
+    %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
+    :ok = PomodoroTimer.reset(pomodoro_timer_pid)
+    {:halt, state}
+  end
+
+  def filter_event({:click, :btn_rest}, _from, state) do
+    %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
+    :ok = PomodoroTimer.rest(pomodoro_timer_pid)
+    {:halt, state}
+  end
+
+  def filter_event(event, _from, state) do
+    Logger.warn("Unhandled event: #{inspect(event)}")
+    {:halt, state}
   end
 
   defp schedule_refresh do

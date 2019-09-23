@@ -12,7 +12,17 @@ defmodule Pomodoro.PomodoroTimer do
 
   defstruct [:total_seconds, :seconds_remaining, :max_rest_seconds, :status, :tick_duration]
 
-  @type status :: :initial | :running | :paused | :resting | :finished
+  @typedoc """
+  * :initial - Initial state
+  * :running - The timer is currently running during a pomodoro work time
+  * :running_paused - The timer is paused during a work time
+  * :limbo - The work time has finished but an explicit rest has not yet begun
+  * :resting - The timer is currently running during a pomodoro rest time
+  * :resting_paused - The timer is paused during a rest time
+  * :finished - The work and rest time have both finished
+  """
+  @type status ::
+          :initial | :running | :running_paused | :limbo | :resting | :resting_paused | :finished
   @type t :: %__MODULE__{
           total_seconds: pos_integer,
           # Counts down from total_seconds to -max_rest_seconds
@@ -71,6 +81,14 @@ defmodule Pomodoro.PomodoroTimer do
     GenServer.call(name, :pause)
   end
 
+  def rest(name \\ @me) do
+    GenServer.call(name, :rest)
+  end
+
+  def reset(name \\ @me, opts \\ []) do
+    GenServer.call(name, {:reset, opts})
+  end
+
   @impl GenServer
   def handle_call(:get_timer, _from, state) do
     %State{timer: timer} = state
@@ -89,28 +107,67 @@ defmodule Pomodoro.PomodoroTimer do
 
     timer =
       if can_start_ticking?(status) do
-        %__MODULE__{timer | status: :running}
+        new_status =
+          case timer.status do
+            :initial -> :running
+            :running_paused -> :running
+            :resting_paused -> :resting
+          end
+
+        %__MODULE__{timer | status: new_status}
       else
         timer
       end
 
     state = %State{state | timer: timer}
     notify_update(state)
-    maybe_schedule_tick(state)
+    state = maybe_schedule_tick(state)
     {:reply, :ok, state}
   end
 
   def handle_call(:pause, _from, state) do
-    %State{timer_ref: timer_ref} = state
-    Process.cancel_timer(timer_ref)
+    state = cancel_timer(state)
+    %State{timer: timer} = state
+
+    new_status =
+      case timer.status do
+        :running -> :running_paused
+        :resting -> :resting_paused
+        status -> status
+      end
+
+    timer = %__MODULE__{timer | status: new_status}
+    state = %State{state | timer_ref: nil, timer: timer}
     notify_update(state)
-    state = %State{state | timer_ref: nil}
+    {:reply, :ok, state}
+  end
+
+  def handle_call(:rest, _from, state) do
+    %State{timer: timer} = state
+    new_status = :resting
+    timer = %__MODULE__{timer | status: new_status, seconds_remaining: 0}
+    state = %State{state | timer: timer}
+
+    state =
+      state
+      |> cancel_timer()
+      |> maybe_schedule_tick()
+
+    notify_update(state)
+    {:reply, :ok, state}
+  end
+
+  def handle_call({:reset, opts}, _from, state) do
+    state = cancel_timer(state)
+    timer = new(opts)
+    state = %State{state | timer: timer}
+    notify_update(state)
     {:reply, :ok, state}
   end
 
   @impl GenServer
   def handle_info(:tick, state) do
-    IO.puts("tick")
+    # IO.puts("tick")
     state = tick_and_notify(state)
 
     state =
@@ -118,6 +175,16 @@ defmodule Pomodoro.PomodoroTimer do
       |> maybe_schedule_tick()
 
     {:noreply, state}
+  end
+
+  defp cancel_timer(state) do
+    %State{timer_ref: timer_ref} = state
+
+    if timer_ref do
+      Process.cancel_timer(timer_ref)
+    end
+
+    %State{state | timer_ref: nil}
   end
 
   defp add_listener(%State{listeners: listeners} = state, pid) do
@@ -143,7 +210,7 @@ defmodule Pomodoro.PomodoroTimer do
     timer =
       cond do
         seconds_remaining == 0 ->
-          %__MODULE__{timer | status: :resting}
+          %__MODULE__{timer | status: :limbo}
 
         seconds_remaining == -max_rest_seconds ->
           %__MODULE__{timer | status: :finished}
@@ -164,10 +231,10 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   defp maybe_schedule_tick(state) do
-    %State{timer: timer} = state
+    %State{timer: timer, timer_ref: timer_ref} = state
     %__MODULE__{status: status, tick_duration: tick_duration} = timer
 
-    if tick?(status) do
+    if tick?(status) && is_nil(timer_ref) do
       timer_ref = Process.send_after(self(), :tick, tick_duration)
       %State{state | timer_ref: timer_ref}
     else
@@ -178,14 +245,18 @@ defmodule Pomodoro.PomodoroTimer do
   @spec tick?(status) :: boolean
   defp tick?(:initial), do: false
   defp tick?(:running), do: true
-  defp tick?(:paused), do: false
+  defp tick?(:running_paused), do: false
+  defp tick?(:limbo), do: true
   defp tick?(:resting), do: true
+  defp tick?(:resting_paused), do: false
   defp tick?(:finished), do: false
 
   # TODO: Should this be replaced with a state machine library?
   defp can_start_ticking?(:initial), do: true
   defp can_start_ticking?(:running), do: false
-  defp can_start_ticking?(:paused), do: true
+  defp can_start_ticking?(:running_paused), do: true
+  defp can_start_ticking?(:limbo), do: false
   defp can_start_ticking?(:resting), do: false
+  defp can_start_ticking?(:resting_paused), do: true
   defp can_start_ticking?(:finished), do: false
 end
