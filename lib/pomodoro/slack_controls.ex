@@ -8,7 +8,8 @@ defmodule Pomodoro.SlackControls do
   * `users.profile:write` - For updating the user's status text
   """
 
-  defp token, do: System.get_env("SLACK_TOKEN")
+  @token System.get_env("SLACK_TOKEN")
+  defp token, do: @token || System.get_env("SLACK_TOKEN")
 
   # DND
   # Slack.Web.Dnd.set_snooze(30, %{token: token})
