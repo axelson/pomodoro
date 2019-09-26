@@ -31,7 +31,7 @@ defmodule Pomodoro.MixProject do
       {:launcher, github: "axelson/scenic_launcher"},
       {:sched_ex, "~> 1.1"},
       dep(:scenic, :hex),
-      {:scenic_driver_glfw, "~> 0.10"},
+      {:scenic_driver_glfw, "~> 0.10", only: :dev},
       {:scenic_live_reload, "~> 0.1.0", only: :dev},
       {:slack, "~> 0.19"}
     ]
