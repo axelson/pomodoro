@@ -29,7 +29,7 @@ defmodule Pomodoro.MixProject do
       {:jason, "~> 1.1"},
       {:httpoison, "~> 1.5"},
       {:sched_ex, "~> 1.1"},
-      dep(:scenic, :path),
+      dep(:scenic, :hex),
       {:scenic_driver_glfw, "~> 0.10"},
       {:scenic_live_reload, "~> 0.1.0"},
       {:slack, "~> 0.19"}
