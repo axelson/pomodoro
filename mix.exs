@@ -28,6 +28,7 @@ defmodule Pomodoro.MixProject do
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false},
       {:jason, "~> 1.1"},
       {:httpoison, "~> 1.5"},
+      {:launcher, github: "axelson/scenic_launcher"},
       {:sched_ex, "~> 1.1"},
       dep(:scenic, :hex),
       {:scenic_driver_glfw, "~> 0.10"},

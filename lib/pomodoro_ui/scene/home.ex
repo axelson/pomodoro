@@ -28,6 +28,7 @@ defmodule PomodoroUi.Scene.Home do
       |> PomodoroUi.TimerComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
       |> PomodoroUi.RestButtonComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
       |> Scenic.Components.button("Reset", id: :btn_reset, t: {10, 10}, button_font_size: 40)
+      |> Launcher.HiddenHomeButton.add_to_graph(on_switch: fn -> send(self(), :reset) end)
 
     schedule_refresh()
 
@@ -41,10 +42,14 @@ defmodule PomodoroUi.Scene.Home do
     {:noreply, state, push: graph}
   end
 
+  def handle_info(:reset, state) do
+    reset_timer(state)
+    {:noreply, state}
+  end
+
   @impl Scenic.Scene
   def filter_event({:click, :btn_reset}, _from, state) do
-    %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
-    :ok = PomodoroTimer.reset(pomodoro_timer_pid)
+    reset_timer(state)
     {:halt, state}
   end
 
@@ -61,5 +66,10 @@ defmodule PomodoroUi.Scene.Home do
 
   defp schedule_refresh do
     Process.send_after(self(), :refresh, @refresh_rate)
+  end
+
+  defp reset_timer(state) do
+    %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
+    :ok = PomodoroTimer.reset(pomodoro_timer_pid)
   end
 end

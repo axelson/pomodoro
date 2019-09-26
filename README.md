@@ -7,9 +7,9 @@
 - [x] Add slack controls
 - [x] Color should change as soon as you tap
 - [x] bug: Double clicks cause duplicate registrations
-- [ ] Re-add launcher
+- [x] Re-add launcher
 - [x] Re-add slack integration
-- [ ] Add an explicit Rest button
+- [x] Add an explicit Rest button
 - [x] Extract out a pomodoro module somewhere (timer_core?) (or just remove timer_core?)
   - This is in the vein of the thought "scenic is not your app"
   - Should also pave the way for an html rendering of the same timer
