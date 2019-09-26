@@ -16,7 +16,9 @@ defmodule Pomodoro.MixProject do
   def application do
     [
       mod: {PomodoroUi, []},
-      extra_applications: [:logger]
+      # Add poison to work around
+      # https://github.com/BlakeWilliams/Elixir-Slack/issues/195
+      extra_applications: [:logger, :poison]
     ]
   end
 
