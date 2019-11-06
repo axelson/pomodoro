@@ -17,6 +17,7 @@
 - [ ] Allow configuring slack integration from the web?
 - [ ] Don't compile the SLACK_TOKEN into the code, instead read it from a secrets file
 - [ ] Show the amount of time spent in limbo (always or only if it's over a threshold?)
+- [ ] Split out the pomodoro timer module from the GenServer
 
 Maybe:
 - [ ] Play a bell sound when the timer finishes
