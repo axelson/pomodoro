@@ -17,7 +17,8 @@ defmodule Pomodoro.PomodoroTimer do
     :max_rest_seconds,
     :max_limbo_seconds,
     :status,
-    :tick_duration
+    :tick_duration,
+    :slack_enabled
   ]
 
   @typedoc """
@@ -70,7 +71,8 @@ defmodule Pomodoro.PomodoroTimer do
       max_rest_seconds: max_rest_seconds,
       max_limbo_seconds: max_limbo_seconds,
       status: :initial,
-      tick_duration: tick_duration
+      tick_duration: tick_duration,
+      slack_enabled: true
     }
   end
 
@@ -106,6 +108,10 @@ defmodule Pomodoro.PomodoroTimer do
 
   def reset(name \\ @me, opts \\ []) do
     GenServer.call(name, {:reset, opts})
+  end
+
+  def set_slack_enabled_status(name \\ @me, value) do
+    GenServer.call(name, {:set_slack_enabled_status, value})
   end
 
   @impl GenServer
@@ -185,6 +191,13 @@ defmodule Pomodoro.PomodoroTimer do
     state = %State{state | timer: timer}
     notify_update(state)
     update_slack_status(timer)
+    {:reply, :ok, state}
+  end
+
+  def handle_call({:set_slack_enabled_status, value}, _from, state) do
+    %State{timer: timer} = state
+    timer = %__MODULE__{timer | slack_enabled: value}
+    state = %State{state | timer: timer}
     {:reply, :ok, state}
   end
 
@@ -269,6 +282,8 @@ defmodule Pomodoro.PomodoroTimer do
       state
     end
   end
+
+  defp update_slack_status(%__MODULE__{slack_enabled: false}), do: nil
 
   defp update_slack_status(timer) do
     %__MODULE__{status: status, seconds_remaining: seconds_remaining} = timer
