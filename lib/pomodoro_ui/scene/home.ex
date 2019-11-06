@@ -28,6 +28,18 @@ defmodule PomodoroUi.Scene.Home do
       |> PomodoroUi.TimerComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
       |> PomodoroUi.RestButtonComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
       |> Scenic.Components.button("Reset", id: :btn_reset, t: {10, 10}, button_font_size: 40)
+      |> Scenic.Components.button("-",
+        id: :btn_subtract_time,
+        t: {width / 2 - 85, height / 2 - 110},
+        width: 60,
+        button_font_size: 30
+      )
+      |> Scenic.Components.button("+",
+        id: :btn_add_time,
+        t: {width / 2 + 25, height / 2 - 110},
+        width: 60,
+        button_font_size: 30
+      )
       |> Scenic.Components.toggle(true, id: :toggle_slack, t: {10, 163})
       |> Scenic.Primitives.text("Update Slack", t: {65, 170})
       |> Launcher.HiddenHomeButton.add_to_graph(on_switch: fn -> send(self(), :reset) end)
@@ -58,6 +70,18 @@ defmodule PomodoroUi.Scene.Home do
   def filter_event({:click, :btn_rest}, _from, state) do
     %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
     :ok = PomodoroTimer.rest(pomodoro_timer_pid)
+    {:halt, state}
+  end
+
+  def filter_event({:click, :btn_add_time}, _from, state) do
+    %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
+    :ok = PomodoroTimer.add_time(pomodoro_timer_pid, 5 * 60)
+    {:halt, state}
+  end
+
+  def filter_event({:click, :btn_subtract_time}, _from, state) do
+    %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
+    :ok = PomodoroTimer.subtract_time(pomodoro_timer_pid, 5 * 60)
     {:halt, state}
   end
 

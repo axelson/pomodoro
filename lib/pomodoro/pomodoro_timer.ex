@@ -102,6 +102,14 @@ defmodule Pomodoro.PomodoroTimer do
     GenServer.call(name, :pause)
   end
 
+  def add_time(name \\ @me, seconds) do
+    GenServer.call(name, {:add_time, seconds})
+  end
+
+  def subtract_time(name \\ @me, seconds) do
+    GenServer.call(name, {:subtract_time, seconds})
+  end
+
   def rest(name \\ @me) do
     GenServer.call(name, :rest)
   end
@@ -166,6 +174,24 @@ defmodule Pomodoro.PomodoroTimer do
     state = %State{state | timer_ref: nil, timer: timer}
     notify_update(state)
     update_slack_status(timer)
+    {:reply, :ok, state}
+  end
+
+  def handle_call({:add_time, seconds}, _from, state) do
+    %State{timer: timer} = state
+    %__MODULE__{seconds_remaining: seconds_remaining} = timer
+    timer = %__MODULE__{timer | seconds_remaining: seconds_remaining + seconds}
+    state = %State{state | timer: timer}
+    notify_update(state)
+    {:reply, :ok, state}
+  end
+
+  def handle_call({:subtract_time, seconds}, _from, state) do
+    %State{timer: timer} = state
+    %__MODULE__{seconds_remaining: seconds_remaining} = timer
+    timer = %__MODULE__{timer | seconds_remaining: seconds_remaining - seconds}
+    state = %State{state | timer: timer}
+    notify_update(state)
     {:reply, :ok, state}
   end
 
@@ -247,13 +273,13 @@ defmodule Pomodoro.PomodoroTimer do
 
     timer =
       cond do
-        status == :running && seconds_remaining == 0 ->
+        status == :running && seconds_remaining <= 0 ->
           %__MODULE__{timer | status: :limbo}
 
-        status == :limbo && seconds_remaining == -max_limbo_seconds ->
+        status == :limbo && seconds_remaining <= -max_limbo_seconds ->
           %__MODULE__{timer | status: :limbo_finished}
 
-        status == :resting && seconds_remaining == -max_rest_seconds ->
+        status == :resting && seconds_remaining <= -max_rest_seconds ->
           %__MODULE__{timer | status: :finished}
 
         true ->
