@@ -26,7 +26,7 @@ defmodule Pomodoro.MixProject do
   defp deps do
     [
       dep(:boundary, :github),
-      dep(:cortex, :path),
+      # dep(:cortex, :path),
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false},
       {:jason, "~> 1.1"},
       {:httpoison, "~> 1.5"},
