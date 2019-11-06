@@ -54,6 +54,7 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
   defp background_color(:running), do: :red
   defp background_color(:running_paused), do: :dark_khaki
   defp background_color(:limbo), do: :purple
+  defp background_color(:limbo_finished), do: :purple
   defp background_color(:resting), do: :blue
   defp background_color(:resting_paused), do: :dodger_blue
   defp background_color(:finished), do: :purple

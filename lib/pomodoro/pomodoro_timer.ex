@@ -8,26 +8,43 @@ defmodule Pomodoro.PomodoroTimer do
   @me __MODULE__
   @default_total_seconds 30 * 60
   @default_max_rest_seconds 15 * 60
+  @default_max_limbo_seconds 15 * 60
   @default_tick_duration 1_000
 
-  defstruct [:total_seconds, :seconds_remaining, :max_rest_seconds, :status, :tick_duration]
+  defstruct [
+    :total_seconds,
+    :seconds_remaining,
+    :max_rest_seconds,
+    :max_limbo_seconds,
+    :status,
+    :tick_duration
+  ]
 
   @typedoc """
   * :initial - Initial state
   * :running - The timer is currently running during a pomodoro work time
   * :running_paused - The timer is paused during a work time
   * :limbo - The work time has finished but an explicit rest has not yet begun
+  * :limbo_finished - The limbo time has finished and the timer should stop ticking
   * :resting - The timer is currently running during a pomodoro rest time
   * :resting_paused - The timer is paused during a rest time
   * :finished - The work and rest time have both finished
   """
   @type status ::
-          :initial | :running | :running_paused | :limbo | :resting | :resting_paused | :finished
+          :initial
+          | :running
+          | :running_paused
+          | :limbo
+          | :limbo_finished
+          | :resting
+          | :resting_paused
+          | :finished
   @type t :: %__MODULE__{
           total_seconds: pos_integer,
           # Counts down from total_seconds to -max_rest_seconds
           seconds_remaining: integer,
           max_rest_seconds: pos_integer,
+          max_limbo_seconds: pos_integer,
           status: status
         }
 
@@ -44,12 +61,14 @@ defmodule Pomodoro.PomodoroTimer do
   def new(opts \\ []) do
     total_seconds = Keyword.get(opts, :total_seconds, @default_total_seconds)
     max_rest_seconds = Keyword.get(opts, :max_rest_seconds, @default_max_rest_seconds)
+    max_limbo_seconds = Keyword.get(opts, :max_limbo_seconds, @default_max_limbo_seconds)
     tick_duration = Keyword.get(opts, :tick_duration, @default_tick_duration)
 
     %__MODULE__{
       total_seconds: total_seconds,
       seconds_remaining: total_seconds,
       max_rest_seconds: max_rest_seconds,
+      max_limbo_seconds: max_limbo_seconds,
       status: :initial,
       tick_duration: tick_duration
     }
@@ -208,15 +227,20 @@ defmodule Pomodoro.PomodoroTimer do
 
     %__MODULE__{
       seconds_remaining: seconds_remaining,
-      max_rest_seconds: max_rest_seconds
+      max_rest_seconds: max_rest_seconds,
+      max_limbo_seconds: max_limbo_seconds,
+      status: status
     } = timer
 
     timer =
       cond do
-        seconds_remaining == 0 ->
+        status == :running && seconds_remaining == 0 ->
           %__MODULE__{timer | status: :limbo}
 
-        seconds_remaining == -max_rest_seconds ->
+        status == :limbo && seconds_remaining == -max_limbo_seconds ->
+          %__MODULE__{timer | status: :limbo_finished}
+
+        status == :resting && seconds_remaining == -max_rest_seconds ->
           %__MODULE__{timer | status: :finished}
 
         true ->
@@ -280,6 +304,7 @@ defmodule Pomodoro.PomodoroTimer do
   defp tick?(:running), do: true
   defp tick?(:running_paused), do: false
   defp tick?(:limbo), do: true
+  defp tick?(:limbo_finished), do: false
   defp tick?(:resting), do: true
   defp tick?(:resting_paused), do: false
   defp tick?(:finished), do: false
@@ -289,6 +314,7 @@ defmodule Pomodoro.PomodoroTimer do
   defp can_start_ticking?(:running), do: false
   defp can_start_ticking?(:running_paused), do: true
   defp can_start_ticking?(:limbo), do: false
+  defp can_start_ticking?(:limbo_finished), do: false
   defp can_start_ticking?(:resting), do: false
   defp can_start_ticking?(:resting_paused), do: true
   defp can_start_ticking?(:finished), do: false

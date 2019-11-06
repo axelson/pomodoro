@@ -88,6 +88,7 @@ defmodule PomodoroUi.RestButtonComponent do
   defp hidden(%PomodoroTimer{status: :running}), do: true
   defp hidden(%PomodoroTimer{status: :running_paused}), do: true
   defp hidden(%PomodoroTimer{status: :limbo}), do: false
+  defp hidden(%PomodoroTimer{status: :limbo_finished}), do: false
   defp hidden(%PomodoroTimer{status: :resting}), do: true
   defp hidden(%PomodoroTimer{status: :resting_paused}), do: true
   defp hidden(%PomodoroTimer{status: :finished}), do: true
