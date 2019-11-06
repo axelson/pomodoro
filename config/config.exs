@@ -20,7 +20,7 @@ config :pomodoro, :viewport, %{
 case Mix.env() do
   :dev ->
     config :exsync,
-      reload_timeout: 15,
+      reload_timeout: 30,
       reload_callback: {ScenicLiveReload, :reload_current_scene, []}
 
   _ ->
