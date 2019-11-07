@@ -1,4 +1,4 @@
-defmodule PomodoroUi.Scene.Home do
+defmodule PomodoroUi.Scene.Main do
   use Scenic.Scene
   require Logger
 

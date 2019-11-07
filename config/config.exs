@@ -7,7 +7,7 @@ config :logger, :console, format: "$time $metadata[$level] $message\n"
 config :pomodoro, :viewport, %{
   name: :main_viewport,
   size: {700, 600},
-  default_scene: {PomodoroUi.Scene.Home, []},
+  default_scene: {PomodoroUi.Scene.Main, []},
   drivers: [
     %{
       module: Scenic.Driver.Glfw,
