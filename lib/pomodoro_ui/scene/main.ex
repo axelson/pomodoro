@@ -14,7 +14,8 @@ defmodule PomodoroUi.Scene.Main do
 
   @impl Scenic.Scene
   def init(_, scenic_opts) do
-    {:ok, %ViewPort.Status{size: {width, height}}} = ViewPort.info(scenic_opts[:viewport])
+    viewport = scenic_opts[:viewport]
+    {:ok, %ViewPort.Status{size: {width, height}}} = ViewPort.info(viewport)
 
     t = {width / 2, height / 2}
 
@@ -28,17 +29,9 @@ defmodule PomodoroUi.Scene.Main do
       |> PomodoroUi.TimerComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
       |> PomodoroUi.RestButtonComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
       |> Scenic.Components.button("Reset", id: :btn_reset, t: {10, 10}, button_font_size: 40)
-      |> Scenic.Components.button("-",
-        id: :btn_subtract_time,
-        t: {width / 2 - 85, height / 2 - 110},
-        width: 60,
-        button_font_size: 30
-      )
-      |> Scenic.Components.button("+",
-        id: :btn_add_time,
-        t: {width / 2 + 25, height / 2 - 110},
-        width: 60,
-        button_font_size: 30
+      |> PomodoroUi.TimeControlsComponent.add_to_graph(
+        [pomodoro_timer: pomodoro_timer, viewport: viewport],
+        []
       )
       |> Scenic.Components.toggle(true, id: :toggle_slack, t: {10, 163})
       |> Scenic.Primitives.text("Update Slack", t: {65, 170})
