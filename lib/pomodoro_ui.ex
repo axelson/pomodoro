@@ -7,16 +7,20 @@ defmodule PomodoroUi do
   def start(_type, _args) do
     children =
       []
-      |> maybe_add_scenic_child()
+      |> maybe_start_scenic()
 
     Supervisor.start_link(children, strategy: :one_for_one)
   end
 
-  defp maybe_add_scenic_child(children) do
+  defp maybe_start_scenic(children) do
     main_viewport_config = Application.get_env(:pomodoro, :viewport)
 
     if main_viewport_config do
-      [{Scenic, viewports: [main_viewport_config]} | children]
+      [
+        {Scenic, viewports: [main_viewport_config]},
+        {ScenicLiveReload, viewports: [main_viewport_config]}
+        | children
+      ]
     else
       children
     end

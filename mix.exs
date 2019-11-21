@@ -46,7 +46,7 @@ defmodule Pomodoro.MixProject do
   defp dep(:scenic, :hex), do: {:scenic, "~> 0.10"}
   defp dep(:scenic, :path), do: {:scenic, path: "../forks/scenic", override: true}
 
-  defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.1.0", only: :dev}
+  defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.2.0", only: :dev}
 
   defp dep(:scenic_live_reload, :path),
     do: {:scenic_live_reload, path: "../scenic_live_reload", only: :dev}
