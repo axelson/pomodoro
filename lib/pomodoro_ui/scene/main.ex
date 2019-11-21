@@ -29,8 +29,11 @@ defmodule PomodoroUi.Scene.Main do
       |> PomodoroUi.TimerComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
       |> PomodoroUi.RestButtonComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
       |> Scenic.Components.button("Reset", id: :btn_reset, t: {10, 10}, button_font_size: 40)
-      |> PomodoroUi.TimeControlsComponent.add_to_graph(
-        [pomodoro_timer: pomodoro_timer, viewport: viewport],
+      |> ScenicUtils.ScenicRendererBehaviour.add_to_graph(
+        [
+          mod: PomodoroUi.TimeControlsComponent,
+          opts: [pomodoro_timer: pomodoro_timer, viewport: viewport]
+        ],
         []
       )
       |> Scenic.Components.toggle(true, id: :toggle_slack, t: {10, 163})
