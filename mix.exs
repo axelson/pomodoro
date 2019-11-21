@@ -29,7 +29,7 @@ defmodule Pomodoro.MixProject do
       # dep(:cortex, :path),
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false},
       {:jason, "~> 1.1"},
-      {:httpoison, "~> 1.5"},
+      {:httpoison, "~> 1.6"},
       {:launcher, github: "axelson/scenic_launcher"},
       {:sched_ex, "~> 1.1"},
       dep(:scenic, :hex),
