@@ -20,7 +20,9 @@ defmodule PomodoroUi.Scene.Main do
     t = {width / 2, height / 2}
 
     # instantiate a timer
-    {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link([])
+    timer_opts = []
+    # timer_opts = [total_seconds: 2]
+    {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link(timer_opts)
     pomodoro_timer = PomodoroTimer.get_timer()
 
     # insantiate a timer component
