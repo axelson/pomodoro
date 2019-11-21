@@ -34,7 +34,8 @@ defmodule Pomodoro.MixProject do
       {:sched_ex, "~> 1.1"},
       dep(:scenic, :hex),
       {:scenic_driver_glfw, "~> 0.10", only: :dev},
-      {:scenic_live_reload, "~> 0.1.0", only: :dev},
+      dep(:scenic_live_reload, :hex),
+      # {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
       {:slack, "~> 0.19"}
     ]
   end
@@ -44,6 +45,11 @@ defmodule Pomodoro.MixProject do
 
   defp dep(:scenic, :hex), do: {:scenic, "~> 0.10"}
   defp dep(:scenic, :path), do: {:scenic, path: "../forks/scenic", override: true}
+
+  defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.1.0", only: :dev}
+
+  defp dep(:scenic_live_reload, :path),
+    do: {:scenic_live_reload, path: "../scenic_live_reload", only: :dev}
 
   defp dep(:cortex, :path), do: {:cortex, path: "../forks/cortex", only: [:dev, :test]}
   defp dep(:cortex, :hex), do: {:cortex, "~> 0.5", only: [:dev, :test]}
