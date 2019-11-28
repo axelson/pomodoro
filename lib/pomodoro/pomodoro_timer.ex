@@ -189,7 +189,8 @@ defmodule Pomodoro.PomodoroTimer do
   def handle_call({:subtract_time, seconds}, _from, state) do
     %State{timer: timer} = state
     %__MODULE__{seconds_remaining: seconds_remaining} = timer
-    timer = %__MODULE__{timer | seconds_remaining: seconds_remaining - seconds}
+    new_seconds = max(seconds_remaining - seconds, 0)
+    timer = %__MODULE__{timer | seconds_remaining: new_seconds}
     state = %State{state | timer: timer}
     notify_update(state)
     {:reply, :ok, state}
