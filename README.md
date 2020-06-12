@@ -23,3 +23,4 @@
 Maybe:
 - [ ] Play a bell sound when the timer finishes
 - [ ] Pull in sched_ex for more accurate timer
+- [ ] Check if Scenic.Viewport.Status should actually be exposed (since it is returned from the public method Scenic.ViewPort.info)
