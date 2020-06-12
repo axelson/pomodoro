@@ -8,7 +8,7 @@ defmodule Pomodoro.MixProject do
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      compilers: Mix.compilers() ++ [:boundary]
+      compilers: [:boundary, :priv_check] ++ Mix.compilers()
     ]
   end
 
@@ -25,9 +25,10 @@ defmodule Pomodoro.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      dep(:boundary, :github),
+      dep(:boundary, :hex),
       # dep(:cortex, :path),
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false},
+      dep(:priv_check, :path),
       {:jason, "~> 1.1"},
       {:httpoison, "~> 1.6"},
       {:launcher, github: "axelson/scenic_launcher"},
@@ -40,6 +41,7 @@ defmodule Pomodoro.MixProject do
     ]
   end
 
+  defp dep(:boundary, :hex), do: {:boundary, "~> 0.4.0"}
   defp dep(:boundary, :github), do: {:boundary, github: "sasa1977/boundary"}
   defp dep(:boundary, :path), do: {:boundary, path: "../forks/boundary"}
 
@@ -53,4 +55,9 @@ defmodule Pomodoro.MixProject do
 
   defp dep(:cortex, :path), do: {:cortex, path: "../forks/cortex", only: [:dev, :test]}
   defp dep(:cortex, :hex), do: {:cortex, "~> 0.5", only: [:dev, :test]}
+
+  defp dep(:priv_check, :hex), do: {:priv_check, "~> 0.1", only: [:dev, :test], runtime: false}
+
+  defp dep(:priv_check, :path),
+    do: {:priv_check, path: "~/dev/priv_check", only: [:dev, :test], runtime: false}
 end
