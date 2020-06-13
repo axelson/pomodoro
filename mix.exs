@@ -8,7 +8,7 @@ defmodule Pomodoro.MixProject do
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      compilers: [:boundary, :priv_check] ++ Mix.compilers()
+      compilers: compilers(Mix.env())
     ]
   end
 
@@ -58,4 +58,7 @@ defmodule Pomodoro.MixProject do
 
   defp dep(:priv_check, :path),
     do: {:priv_check, path: "~/dev/priv_check", only: [:dev, :test], runtime: false}
+
+  defp compilers(:prod), do: [:boundary] ++ Mix.compilers()
+  defp compilers(_), do: [:boundary, :priv_check] ++ Mix.compilers()
 end
