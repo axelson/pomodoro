@@ -38,13 +38,20 @@ defmodule PomodoroUi.Scene.Main do
         ],
         []
       )
-      |> Scenic.Components.toggle(true, id: :toggle_slack, t: {10, 163})
-      |> Scenic.Primitives.text("Update Slack", t: {65, 170})
+      |> maybe_add_update_slack_controls(Pomodoro.slack_controls_enabled?())
       |> Launcher.HiddenHomeButton.add_to_graph(on_switch: fn -> send(self(), :reset) end)
 
     schedule_refresh()
 
     {:ok, %State{graph: graph, pomodoro_timer_pid: pomodoro_timer_pid}, push: graph}
+  end
+
+  defp maybe_add_update_slack_controls(graph, false), do: graph
+
+  defp maybe_add_update_slack_controls(graph, true) do
+    graph
+    |> Scenic.Primitives.text("Update Slack", t: {65, 170})
+    |> Scenic.Components.toggle(true, id: :toggle_slack, t: {10, 163})
   end
 
   @impl Scenic.Scene

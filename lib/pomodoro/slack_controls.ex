@@ -11,6 +11,8 @@ defmodule Pomodoro.SlackControls do
   @token System.get_env("SLACK_TOKEN")
   defp token, do: @token || System.get_env("SLACK_TOKEN")
 
+  def enabled?, do: not is_nil(token())
+
   # DND
   # Slack.Web.Dnd.set_snooze(30, %{token: token})
   # Slack.Web.Dnd.end_snooze(%{token: token})
