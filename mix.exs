@@ -39,7 +39,7 @@ defmodule Pomodoro.MixProject do
     ]
   end
 
-  defp dep(:boundary, :hex), do: {:boundary, "~> 0.4.0"}
+  defp dep(:boundary, :hex), do: {:boundary, "~> 0.7.0"}
   defp dep(:boundary, :github), do: {:boundary, github: "sasa1977/boundary"}
   defp dep(:boundary, :path), do: {:boundary, path: "../forks/boundary"}
 
