@@ -60,5 +60,6 @@ defmodule Pomodoro.MixProject do
     do: {:priv_check, path: "~/dev/priv_check", only: [:dev, :test], runtime: false}
 
   defp compilers(:prod), do: [:boundary] ++ Mix.compilers()
-  defp compilers(_), do: [:boundary, :priv_check] ++ Mix.compilers()
+  # defp compilers(_), do: [:boundary, :priv_check] ++ Mix.compilers()
+  defp compilers(_), do: [:boundary] ++ Mix.compilers()
 end
