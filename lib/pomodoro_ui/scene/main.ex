@@ -25,8 +25,6 @@ defmodule PomodoroUi.Scene.Main do
     {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link(timer_opts)
     pomodoro_timer = PomodoroTimer.get_timer()
 
-    mini_timer_t = {width - 100, 150}
-
     # insantiate a timer component
     graph =
       Graph.build(font: :roboto)
@@ -41,15 +39,6 @@ defmodule PomodoroUi.Scene.Main do
         []
       )
       |> maybe_add_update_slack_controls(Pomodoro.slack_controls_enabled?())
-      |> PomodoroUi.Scene.MiniComponent.add_to_graph(
-        [
-          pomodoro_timer: pomodoro_timer,
-          pomodoro_timer_pid: pomodoro_timer_pid,
-          t: mini_timer_t
-        ],
-        scale: 0.7,
-        pin: mini_timer_t
-      )
       |> Launcher.HiddenHomeButton.add_to_graph(on_switch: fn -> send(self(), :reset) end)
 
     schedule_refresh()
