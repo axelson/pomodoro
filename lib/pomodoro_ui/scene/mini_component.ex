@@ -8,7 +8,6 @@ defmodule PomodoroUi.Scene.MiniComponent do
 
   alias Pomodoro.PomodoroTimer
   alias Scenic.Graph
-  alias Scenic.ViewPort
 
   @refresh_rate round(1_000 / 30)
 
@@ -19,12 +18,12 @@ defmodule PomodoroUi.Scene.MiniComponent do
   @impl Scenic.Component
   def verify(data), do: {:ok, data}
 
+  @impl Scenic.Scene
   def init(opts, scenic_opts) do
     viewport = scenic_opts[:viewport]
-    {:ok, %ViewPort.Status{size: {width, height}}} = ViewPort.info(viewport)
 
     component_width = 110
-    {t_x, t_y} = t = Keyword.get(opts, :t)
+    {t_x, t_y} = Keyword.get(opts, :t)
     reset_btn_t = {t_x - component_width + 25, t_y}
     time_display_t = {t_x, t_y + 145}
 

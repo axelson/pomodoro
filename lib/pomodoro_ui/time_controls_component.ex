@@ -40,16 +40,16 @@ defmodule PomodoroUi.TimeControlsComponent do
 
   @impl ScenicUtils.ScenicRendererBehaviour
   def draw(graph, state) do
-    %State{pomodoro_timer: pomodoro_timer, width: width, height: height} = state
+    %State{pomodoro_timer: pomodoro_timer} = state
 
     graph
     |> Scenic.Primitives.group(
-      fn g -> render_buttons(g, state, pomodoro_timer, width, height) end,
+      fn g -> render_buttons(g, state, pomodoro_timer) end,
       id: :time_controls
     )
   end
 
-  defp render_buttons(g, state, pomodoro_timer, width, height) do
+  defp render_buttons(g, state, pomodoro_timer) do
     g
     |> Scenic.Components.button("-",
       id: :btn_subtract_time,
