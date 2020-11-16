@@ -4,7 +4,7 @@ defmodule PomodoroUi.TimeControlsComponent do
   @behaviour ScenicUtils.ScenicRendererBehaviour
 
   defmodule State do
-    defstruct [:graph, :pomodoro_timer, :width, :height]
+    defstruct [:graph, :pomodoro_timer, :width, :height, :x1, :x2, :y]
   end
 
   @impl ScenicUtils.ScenicRendererBehaviour
@@ -14,11 +14,22 @@ defmodule PomodoroUi.TimeControlsComponent do
   def init(opts, _scenic_opts) do
     pomodoro_timer = Keyword.fetch!(opts, :pomodoro_timer)
     viewport = Keyword.fetch!(opts, :viewport)
+    x1 = Keyword.get(opts, :x1)
+    x2 = Keyword.get(opts, :x2)
+    y = Keyword.get(opts, :y)
     PomodoroTimer.register(self())
 
     {:ok, %Scenic.ViewPort.Status{size: {width, height}}} = Scenic.ViewPort.info(viewport)
 
-    state = %State{pomodoro_timer: pomodoro_timer, width: width, height: height}
+    state = %State{
+      pomodoro_timer: pomodoro_timer,
+      width: width,
+      height: height,
+      x1: x1,
+      x2: x2,
+      y: y
+    }
+
     {:ok, state}
   end
 
@@ -33,28 +44,34 @@ defmodule PomodoroUi.TimeControlsComponent do
 
     graph
     |> Scenic.Primitives.group(
-      fn g -> render_buttons(g, pomodoro_timer, width, height) end,
+      fn g -> render_buttons(g, state, pomodoro_timer, width, height) end,
       id: :time_controls
     )
   end
 
-  defp render_buttons(g, pomodoro_timer, width, height) do
+  defp render_buttons(g, state, pomodoro_timer, width, height) do
     g
     |> Scenic.Components.button("-",
       id: :btn_subtract_time,
-      t: {width / 2 - 85, height / 2 - 110},
+      t: left_t(state),
       width: 60,
       button_font_size: 30,
       hidden: !visible(pomodoro_timer)
     )
     |> Scenic.Components.button("+",
       id: :btn_add_time,
-      t: {width / 2 + 25, height / 2 - 110},
+      t: right_t(state),
       width: 60,
       button_font_size: 30,
       hidden: !visible(pomodoro_timer)
     )
   end
+
+  defp left_t(%State{x1: x1, y: y}) when not is_nil(x1) and not is_nil(y), do: {x1, y}
+  defp left_t(%State{width: width, height: height}), do: {width / 2 - 85, height / 2 - 110}
+
+  defp right_t(%State{x2: x2, y: y}) when not is_nil(x2) and not is_nil(y), do: {x2, y}
+  defp right_t(%State{width: width, height: height}), do: {width / 2 + 25, height / 2 - 110}
 
   defp visible(%PomodoroTimer{status: :initial}), do: true
   defp visible(%PomodoroTimer{status: :running}), do: false

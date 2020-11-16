@@ -1,5 +1,9 @@
-defmodule PomodoroUi.Scene.Main do
-  use Scenic.Scene
+defmodule PomodoroUi.Scene.MiniComponent do
+  @moduledoc """
+  An embeddable version of the main scene
+  """
+
+  use Scenic.Component
   require Logger
 
   alias Pomodoro.PomodoroTimer
@@ -12,57 +16,57 @@ defmodule PomodoroUi.Scene.Main do
     defstruct [:graph, :pomodoro_timer_pid]
   end
 
-  @impl Scenic.Scene
-  def init(_, scenic_opts) do
+  @impl Scenic.Component
+  def verify(data), do: {:ok, data}
+
+  def init(opts, scenic_opts) do
     viewport = scenic_opts[:viewport]
     {:ok, %ViewPort.Status{size: {width, height}}} = ViewPort.info(viewport)
 
-    t = {width / 2, height / 2}
+    component_width = 110
+    {t_x, t_y} = t = Keyword.get(opts, :t)
+    reset_btn_t = {t_x - component_width + 25, t_y}
+    time_display_t = {t_x, t_y + 145}
 
-    # instantiate a timer
-    timer_opts = []
-    # timer_opts = [total_seconds: 2]
-    {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link(timer_opts)
-    pomodoro_timer = PomodoroTimer.get_timer()
+    pomodoro_timer_pid = Keyword.get(opts, :pomodoro_timer_pid)
 
-    mini_timer_t = {width - 100, 150}
+    {pomodoro_timer, pomodoro_timer_pid} =
+      if pomodoro_timer_pid do
+        pomodoro_timer = Keyword.fetch!(opts, :pomodoro_timer)
+        {pomodoro_timer, pomodoro_timer_pid}
+      else
+        timer_opts = []
+        {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link(timer_opts)
+        pomodoro_timer = PomodoroTimer.get_timer()
+        {pomodoro_timer, pomodoro_timer_pid}
+      end
 
-    # insantiate a timer component
     graph =
       Graph.build(font: :roboto)
-      |> PomodoroUi.TimerComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
-      |> PomodoroUi.RestButtonComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
-      |> Scenic.Components.button("Reset", id: :btn_reset, t: {10, 10}, button_font_size: 40)
+      |> PomodoroUi.TimerComponent.add_to_graph([pomodoro_timer: pomodoro_timer],
+        t: time_display_t
+      )
+      |> PomodoroUi.RestButtonComponent.add_to_graph([pomodoro_timer: pomodoro_timer],
+        t: time_display_t
+      )
+      |> Scenic.Components.button("Reset", id: :btn_reset, t: reset_btn_t, button_font_size: 20)
       |> ScenicUtils.ScenicRendererBehaviour.add_to_graph(
         [
           mod: PomodoroUi.TimeControlsComponent,
-          opts: [pomodoro_timer: pomodoro_timer, viewport: viewport]
+          opts: [
+            pomodoro_timer: pomodoro_timer,
+            viewport: viewport,
+            x1: t_x - component_width / 2 - 30,
+            x2: t_x + component_width / 2 - 30,
+            y: t_y + 45
+          ]
         ],
         []
       )
-      |> maybe_add_update_slack_controls(Pomodoro.slack_controls_enabled?())
-      |> PomodoroUi.Scene.MiniComponent.add_to_graph(
-        [
-          pomodoro_timer: pomodoro_timer,
-          pomodoro_timer_pid: pomodoro_timer_pid,
-          t: mini_timer_t
-        ],
-        scale: 0.7,
-        pin: mini_timer_t
-      )
-      |> Launcher.HiddenHomeButton.add_to_graph(on_switch: fn -> send(self(), :reset) end)
 
     schedule_refresh()
 
     {:ok, %State{graph: graph, pomodoro_timer_pid: pomodoro_timer_pid}, push: graph}
-  end
-
-  defp maybe_add_update_slack_controls(graph, false), do: graph
-
-  defp maybe_add_update_slack_controls(graph, true) do
-    graph
-    |> Scenic.Primitives.text("Update Slack", t: {65, 170})
-    |> Scenic.Components.toggle(true, id: :toggle_slack, t: {10, 163})
   end
 
   @impl Scenic.Scene
@@ -98,12 +102,6 @@ defmodule PomodoroUi.Scene.Main do
   def filter_event({:click, :btn_subtract_time}, _from, state) do
     %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
     :ok = PomodoroTimer.subtract_time(pomodoro_timer_pid, 5 * 60)
-    {:halt, state}
-  end
-
-  def filter_event({:value_changed, :toggle_slack, value}, _from, state) do
-    %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
-    PomodoroTimer.set_slack_enabled_status(pomodoro_timer_pid, value)
     {:halt, state}
   end
 
