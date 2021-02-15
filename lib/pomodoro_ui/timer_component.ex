@@ -60,6 +60,7 @@ defmodule PomodoroUi.TimerComponent do
       :running -> PomodoroTimer.pause()
       :running_paused -> PomodoroTimer.start_ticking()
       :limbo -> nil
+      :limbo_finished -> nil
       :resting -> PomodoroTimer.pause()
       :resting_paused -> PomodoroTimer.start_ticking()
       # TODO: This actually causes an exception...
