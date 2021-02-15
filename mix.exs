@@ -34,12 +34,12 @@ defmodule Pomodoro.MixProject do
       dep(:scenic, :hex),
       {:scenic_driver_glfw, "~> 0.10", only: :dev},
       dep(:scenic_live_reload, :hex),
-      # {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
+      {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
       {:slack, "~> 0.19"}
     ]
   end
 
-  defp dep(:boundary, :hex), do: {:boundary, "~> 0.7.0"}
+  defp dep(:boundary, :hex), do: {:boundary, "~> 0.8"}
   defp dep(:boundary, :github), do: {:boundary, github: "sasa1977/boundary"}
   defp dep(:boundary, :path), do: {:boundary, path: "../forks/boundary"}
 
