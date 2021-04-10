@@ -25,7 +25,7 @@ defmodule Pomodoro.MixProject do
     [
       dep(:boundary, :hex),
       # dep(:cortex, :path),
-      {:dialyxir, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       dep(:priv_check, :hex),
       {:jason, "~> 1.1"},
       {:httpoison, "~> 1.6"},
