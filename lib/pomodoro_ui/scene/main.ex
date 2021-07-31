@@ -64,7 +64,9 @@ defmodule PomodoroUi.Scene.Main do
     state = scene.assigns.state
     %State{graph: graph} = state
     schedule_refresh()
-    # NOTE: This is not working, it does not cause the image to be redisplayed
+
+    # NOTE: This is not working, it does not cause the image to be redisplayed (at least on Arch Linux)
+    # This is probably: https://github.com/boydm/scenic_driver_glfw/issues/15
     scene = push_graph(scene, graph)
 
     {:noreply, scene}
