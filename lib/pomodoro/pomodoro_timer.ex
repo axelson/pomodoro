@@ -4,6 +4,7 @@ defmodule Pomodoro.PomodoroTimer do
   """
 
   use GenServer
+  require Logger
 
   @me __MODULE__
   @default_total_seconds 30 * 60
@@ -237,6 +238,11 @@ defmodule Pomodoro.PomodoroTimer do
       %State{state | timer_ref: nil}
       |> maybe_schedule_tick()
 
+    {:noreply, state}
+  end
+
+  def handle_info(msg, state) do
+    Logger.warn("PomodoroTimer Unhandled message: #{inspect(msg)}")
     {:noreply, state}
   end
 

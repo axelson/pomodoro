@@ -27,7 +27,8 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
     |> Primitives.text(text,
       t: {0, 0},
       fill: :white,
-      text_align: :center_middle,
+      text_align: :center,
+      text_base: :middle,
       font_size: @font_size
     )
   end
@@ -36,7 +37,7 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
     %PomodoroTimer{status: status} = pomodoro_timer
     text = timer_text(pomodoro_timer)
 
-    fm = Scenic.Cache.Static.FontMetrics.get!(:roboto)
+    {:ok, {_type, fm}} = Scenic.Assets.Static.fetch(:roboto)
     width = FontMetrics.width(text, @font_size, fm)
     height = @font_size
 

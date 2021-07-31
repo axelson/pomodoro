@@ -29,22 +29,40 @@ defmodule Pomodoro.MixProject do
       dep(:priv_check, :hex),
       {:jason, "~> 1.1"},
       {:httpoison, "~> 1.6"},
-      {:launcher, github: "axelson/scenic_launcher"},
+      dep(:launcher, :github),
       {:sched_ex, "~> 1.1"},
-      dep(:scenic, :hex),
-      {:scenic_driver_glfw, "~> 0.10", only: :dev},
-      dep(:scenic_live_reload, :hex),
+      dep(:scenic, :github),
+      dep(:scenic_driver_glfw, :github),
+      dep(:scenic_live_reload, :path),
       {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
+      {:truetype_metrics, "~> 0.5.1"},
       {:slack, "~> 0.19"}
     ]
   end
+
+  defp dep(:launcher, :github), do: {:launcher, github: "axelson/scenic_launcher"}
+  defp dep(:launcher, :path), do: {:launcher, path: "~/dev/launcher"}
 
   defp dep(:boundary, :hex), do: {:boundary, "~> 0.8"}
   defp dep(:boundary, :github), do: {:boundary, github: "sasa1977/boundary"}
   defp dep(:boundary, :path), do: {:boundary, path: "../forks/boundary"}
 
   defp dep(:scenic, :hex), do: {:scenic, "~> 0.10"}
+
+  defp dep(:scenic, :github),
+    do: {:scenic, github: "boydm/scenic", ref: "7c6b7ef", override: true}
+
   defp dep(:scenic, :path), do: {:scenic, path: "../forks/scenic", override: true}
+
+  defp dep(:scenic_driver_glfw, :hex), do: {:scenic_driver_glfw, "~> 0.10", only: :dev}
+
+  defp dep(:scenic_driver_glfw, :github),
+    do:
+      {:scenic_driver_glfw,
+       github: "boydm/scenic_driver_glfw", ref: "935c632", only: :dev, override: true}
+
+  defp dep(:scenic_driver_glfw, :path),
+    do: {:scenic_driver_glfw, path: "../forks/scenic_driver_glfw", only: :dev, override: true}
 
   defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.2.0", only: :dev}
 
