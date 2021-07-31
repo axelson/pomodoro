@@ -18,17 +18,12 @@ defmodule ScenicUtils.ScenicRendererBehaviour do
   end
 
   @impl Scenic.Component
-  def info(data) do
-    "Error, with interpreting #{inspect(data)}"
-  end
-
-  @impl Scenic.Component
-  def verify(opts) do
+  def validate(opts) do
     {:ok, opts}
   end
 
   @impl Scenic.Scene
-  def init(opts, scenic_opts) do
+  def init(scene, opts, scenic_opts) do
     mod = Keyword.fetch!(opts, :mod)
     component_opts = Keyword.get(opts, :opts)
 
@@ -36,15 +31,22 @@ defmodule ScenicUtils.ScenicRendererBehaviour do
       {:ok, component_state} ->
         graph = draw(Graph.build(), mod, component_state)
         state = %State{component_state: component_state, graph: graph, mod: mod}
-        {:ok, state, push: graph}
+
+        scene =
+          scene
+          |> assign(:state, state)
+          |> push_graph(graph)
+
+        {:ok, scene}
 
       {:error, error} ->
         {:error, error}
     end
   end
 
-  @impl Scenic.Scene
-  def handle_info(msg, state) do
+  @impl GenServer
+  def handle_info(msg, scene) do
+    state = scene.assigns.state
     %State{mod: mod, component_state: component_state} = state
 
     case mod.handle_message(msg, component_state) do
@@ -52,10 +54,22 @@ defmodule ScenicUtils.ScenicRendererBehaviour do
         %State{graph: graph} = state
         state = %State{state | component_state: component_state}
         graph = draw(graph, mod, component_state)
-        {:noreply, state, push: graph}
+
+        scene =
+          scene
+          |> assign(:state, state)
+          |> push_graph(graph)
+
+        {:noreply, scene}
 
       {:ok, component_state} ->
-        {:noreply, component_state}
+        state = %State{state | component_state: component_state}
+
+        scene =
+          scene
+          |> assign(:state, state)
+
+        {:noreply, scene}
     end
   end
 

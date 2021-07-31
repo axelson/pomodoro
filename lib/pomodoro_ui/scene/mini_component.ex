@@ -16,10 +16,10 @@ defmodule PomodoroUi.Scene.MiniComponent do
   end
 
   @impl Scenic.Component
-  def verify(data), do: {:ok, data}
+  def validate(data), do: {:ok, data}
 
   @impl Scenic.Scene
-  def init(opts, scenic_opts) do
+  def init(scene, opts, scenic_opts) do
     viewport = scenic_opts[:viewport]
 
     component_width = 110
@@ -64,49 +64,60 @@ defmodule PomodoroUi.Scene.MiniComponent do
       )
 
     schedule_refresh()
+    state = %State{graph: graph, pomodoro_timer_pid: pomodoro_timer_pid}
 
-    {:ok, %State{graph: graph, pomodoro_timer_pid: pomodoro_timer_pid}, push: graph}
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(graph)
+
+    {:ok, scene}
   end
 
-  @impl Scenic.Scene
-  def handle_info(:refresh, state) do
+  @impl GenServer
+  def handle_info(:refresh, scene) do
+    state = scene.assigns.state
     %State{graph: graph} = state
     schedule_refresh()
-    {:noreply, state, push: graph}
+    scene = push_graph(scene, graph)
+    {:noreply, scene}
   end
 
-  def handle_info(:reset, state) do
-    reset_timer(state)
-    {:noreply, state}
+  def handle_info(:reset, scene) do
+    reset_timer(scene.assigns.state)
+    {:noreply, scene}
   end
 
   @impl Scenic.Scene
-  def filter_event({:click, :btn_reset}, _from, state) do
-    reset_timer(state)
-    {:halt, state}
+  def handle_event({:click, :btn_reset}, _from, scene) do
+    reset_timer(scene.assigns.state)
+    {:halt, scene}
   end
 
-  def filter_event({:click, :btn_rest}, _from, state) do
+  def handle_event({:click, :btn_rest}, _from, scene) do
+    state = scene.assigns.state
     %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
     :ok = PomodoroTimer.rest(pomodoro_timer_pid)
-    {:halt, state}
+    {:halt, scene}
   end
 
-  def filter_event({:click, :btn_add_time}, _from, state) do
+  def handle_event({:click, :btn_add_time}, _from, scene) do
+    state = scene.assigns.state
     %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
     :ok = PomodoroTimer.add_time(pomodoro_timer_pid, 5 * 60)
-    {:halt, state}
+    {:halt, scene}
   end
 
-  def filter_event({:click, :btn_subtract_time}, _from, state) do
+  def handle_event({:click, :btn_subtract_time}, _from, scene) do
+    state = scene.assigns.state
     %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
     :ok = PomodoroTimer.subtract_time(pomodoro_timer_pid, 5 * 60)
-    {:halt, state}
+    {:halt, scene}
   end
 
-  def filter_event(event, _from, state) do
+  def handle_event(event, _from, scene) do
     Logger.warn("Unhandled event: #{inspect(event)}")
-    {:halt, state}
+    {:halt, scene}
   end
 
   defp schedule_refresh do

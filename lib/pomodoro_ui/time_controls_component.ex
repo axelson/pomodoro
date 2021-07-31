@@ -13,13 +13,12 @@ defmodule PomodoroUi.TimeControlsComponent do
   @impl ScenicUtils.ScenicRendererBehaviour
   def init(opts, _scenic_opts) do
     pomodoro_timer = Keyword.fetch!(opts, :pomodoro_timer)
-    viewport = Keyword.fetch!(opts, :viewport)
+    width = Keyword.get(opts, :width)
+    height = Keyword.get(opts, :height)
     x1 = Keyword.get(opts, :x1)
     x2 = Keyword.get(opts, :x2)
     y = Keyword.get(opts, :y)
     PomodoroTimer.register(self())
-
-    {:ok, %Scenic.ViewPort.Status{size: {width, height}}} = Scenic.ViewPort.info(viewport)
 
     state = %State{
       pomodoro_timer: pomodoro_timer,
@@ -68,10 +67,10 @@ defmodule PomodoroUi.TimeControlsComponent do
   end
 
   defp left_t(%State{x1: x1, y: y}) when not is_nil(x1) and not is_nil(y), do: {x1, y}
-  defp left_t(%State{width: width, height: height}), do: {width / 2 - 85, height / 2 - 110}
+  defp left_t(%State{width: width, height: height}), do: {width / 2 - 100, height / 2 - 110}
 
   defp right_t(%State{x2: x2, y: y}) when not is_nil(x2) and not is_nil(y), do: {x2, y}
-  defp right_t(%State{width: width, height: height}), do: {width / 2 + 25, height / 2 - 110}
+  defp right_t(%State{width: width, height: height}), do: {width / 2 + 40, height / 2 - 110}
 
   defp visible(%PomodoroTimer{status: :initial}), do: true
   defp visible(%PomodoroTimer{status: :running}), do: false

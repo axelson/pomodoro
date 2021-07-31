@@ -4,7 +4,6 @@ defmodule PomodoroUi.Scene.Main do
 
   alias Pomodoro.PomodoroTimer
   alias Scenic.Graph
-  alias Scenic.ViewPort
 
   @refresh_rate round(1_000 / 30)
 
@@ -13,9 +12,8 @@ defmodule PomodoroUi.Scene.Main do
   end
 
   @impl Scenic.Scene
-  def init(_, scenic_opts) do
-    viewport = scenic_opts[:viewport]
-    {:ok, %ViewPort.Status{size: {width, height}}} = ViewPort.info(viewport)
+  def init(scene, _, _scenic_opts) do
+    %Scenic.ViewPort{size: {width, height}} = scene.viewport
 
     t = {width / 2, height / 2}
 
@@ -25,7 +23,7 @@ defmodule PomodoroUi.Scene.Main do
     {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link(timer_opts)
     pomodoro_timer = PomodoroTimer.get_timer()
 
-    # insantiate a timer component
+    # Instantiate a timer component
     graph =
       Graph.build(font: :roboto)
       |> PomodoroUi.TimerComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
@@ -34,7 +32,7 @@ defmodule PomodoroUi.Scene.Main do
       |> ScenicUtils.ScenicRendererBehaviour.add_to_graph(
         [
           mod: PomodoroUi.TimeControlsComponent,
-          opts: [pomodoro_timer: pomodoro_timer, viewport: viewport]
+          opts: [pomodoro_timer: pomodoro_timer, width: width, height: height]
         ],
         []
       )
@@ -43,7 +41,14 @@ defmodule PomodoroUi.Scene.Main do
 
     schedule_refresh()
 
-    {:ok, %State{graph: graph, pomodoro_timer_pid: pomodoro_timer_pid}, push: graph}
+    state = %State{graph: graph, pomodoro_timer_pid: pomodoro_timer_pid}
+
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(graph)
+
+    {:ok, scene}
   end
 
   defp maybe_add_update_slack_controls(graph, false), do: graph
@@ -54,51 +59,72 @@ defmodule PomodoroUi.Scene.Main do
     |> Scenic.Components.toggle(true, id: :toggle_slack, t: {10, 163})
   end
 
-  @impl Scenic.Scene
-  def handle_info(:refresh, state) do
+  @impl GenServer
+  def handle_info(:refresh, scene) do
+    state = scene.assigns.state
     %State{graph: graph} = state
     schedule_refresh()
-    {:noreply, state, push: graph}
+
+    # NOTE: This is not working, it does not cause the image to be redisplayed (at least on Arch Linux)
+    # This is probably: https://github.com/boydm/scenic_driver_glfw/issues/15
+    scene = push_graph(scene, graph)
+
+    {:noreply, scene}
   end
 
-  def handle_info(:reset, state) do
-    reset_timer(state)
-    {:noreply, state}
+  def handle_info(:reset, scene) do
+    reset_timer(scene.assigns.state)
+    {:noreply, scene}
+  end
+
+  def handle_info(msg, scene) do
+    Logger.warn("Unhandled handle_info: #{inspect(msg)}")
+    {:noreply, scene}
   end
 
   @impl Scenic.Scene
-  def filter_event({:click, :btn_reset}, _from, state) do
-    reset_timer(state)
-    {:halt, state}
+  def handle_input(event, _hit_id, scene) do
+    Logger.warn("Unhandled input: #{inspect(event)}")
+    {:halt, scene}
   end
 
-  def filter_event({:click, :btn_rest}, _from, state) do
+  @impl Scenic.Scene
+  def handle_event({:click, :btn_reset}, _from, scene) do
+    reset_timer(scene.assigns.state)
+    {:halt, scene}
+  end
+
+  def handle_event({:click, :btn_rest}, _from, scene) do
+    state = scene.assigns.state
     %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
     :ok = PomodoroTimer.rest(pomodoro_timer_pid)
-    {:halt, state}
+    {:halt, scene}
   end
 
-  def filter_event({:click, :btn_add_time}, _from, state) do
+  def handle_event({:click, :btn_add_time}, _from, scene) do
+    state = scene.assigns.state
     %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
     :ok = PomodoroTimer.add_time(pomodoro_timer_pid, 5 * 60)
-    {:halt, state}
+    {:halt, scene}
   end
 
-  def filter_event({:click, :btn_subtract_time}, _from, state) do
+  def handle_event({:click, :btn_subtract_time}, _from, scene) do
+    state = scene.assigns.state
     %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
     :ok = PomodoroTimer.subtract_time(pomodoro_timer_pid, 5 * 60)
-    {:halt, state}
+    {:halt, scene}
   end
 
-  def filter_event({:value_changed, :toggle_slack, value}, _from, state) do
+  def handle_event({:value_changed, :toggle_slack, value}, _from, scene) do
+    state = scene.assigns.state
     %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
     PomodoroTimer.set_slack_enabled_status(pomodoro_timer_pid, value)
-    {:halt, state}
+    {:halt, scene}
   end
 
-  def filter_event(event, _from, state) do
+  def handle_event(event, _from, scene) do
     Logger.warn("Unhandled event: #{inspect(event)}")
-    {:halt, state}
+    {:noreply, scene}
   end
 
   defp schedule_refresh do

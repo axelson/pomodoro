@@ -13,17 +13,7 @@ defmodule PomodoroUi.RestButtonComponent do
 
   @doc false
   @impl Scenic.Component
-  def info(data) do
-    """
-    #{IO.ANSI.red()}data must be a keyword list
-    #{IO.ANSI.yellow()}Received: #{inspect(data)}
-    #{IO.ANSI.default_color()}
-    """
-  end
-
-  @doc false
-  @impl Scenic.Component
-  def verify(opts) do
+  def validate(opts) do
     if Keyword.keyword?(opts) do
       {:ok, opts}
     else
@@ -32,7 +22,7 @@ defmodule PomodoroUi.RestButtonComponent do
   end
 
   @impl Scenic.Scene
-  def init(opts, _scenic_opts) do
+  def init(scene, opts, _scenic_opts) do
     pomodoro_timer = Keyword.fetch!(opts, :pomodoro_timer)
     PomodoroTimer.register(self())
 
@@ -45,11 +35,17 @@ defmodule PomodoroUi.RestButtonComponent do
       pomodoro_timer: pomodoro_timer
     }
 
-    {:ok, state, push: graph}
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(graph)
+
+    {:ok, scene}
   end
 
-  @impl Scenic.Scene
-  def handle_info({:pomodoro_timer, pomodoro_timer}, state) do
+  @impl GenServer
+  def handle_info({:pomodoro_timer, pomodoro_timer}, scene) do
+    state = scene.assigns.state
     %State{graph: graph} = state
 
     graph =
@@ -59,16 +55,20 @@ defmodule PomodoroUi.RestButtonComponent do
       end)
 
     state = %State{state | graph: graph}
-    {:noreply, state, push: graph}
+
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(graph)
+
+    {:noreply, scene}
   end
 
   defp draw(graph, pomodoro_timer) do
-    font_size = 40
-    font = :roboto
-
     text = "Rest"
+    font_size = 40
 
-    fm = Scenic.Cache.Static.FontMetrics.get!(font)
+    {:ok, {_type, fm}} = Scenic.Assets.Static.fetch(:roboto)
     ascent = FontMetrics.ascent(font_size, fm)
     fm_width = FontMetrics.width(text, font_size, fm)
 

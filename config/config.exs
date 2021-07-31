@@ -4,24 +4,32 @@ use Mix.Config
 
 config :logger, :console, format: "$time $metadata[$level] $message\n"
 
-config :pomodoro, :viewport, %{
+config :pomodoro, :viewport,
   name: :main_viewport,
   # size: {700, 600},
   size: {800, 480},
   default_scene: {PomodoroUi.Scene.Main, []},
   drivers: [
-    %{
+    [
       module: Scenic.Driver.Glfw,
       name: :glfw,
-      opts: [resizeable: false, title: "Pomodoro Timer"]
-    }
+      resizeable: false,
+      title: "Pomodoro Timer"
+    ]
   ]
-}
+
+config :scenic, :assets,
+  module: PomodoroUi.Assets,
+  alias: [
+    roboto: "fonts/roboto.ttf"
+  ]
+
+config :tzdata, :autoupdate, :disabled
 
 case Mix.env() do
   :dev ->
     config :exsync,
-      reload_timeout: 30,
+      reload_timeout: 50,
       reload_callback: {ScenicLiveReload, :reload_current_scene, []}
 
   _ ->
