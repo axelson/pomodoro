@@ -68,7 +68,7 @@ defmodule PomodoroUi.RestButtonComponent do
     text = "Rest"
     font_size = 40
 
-    {:ok, {_type, fm}} = Scenic.Assets.Static.fetch(:roboto)
+    {:ok, {_type, fm}} = Scenic.Assets.Static.meta(:roboto)
     ascent = FontMetrics.ascent(font_size, fm)
     fm_width = FontMetrics.width(text, font_size, fm)
 

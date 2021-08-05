@@ -18,11 +18,7 @@ config :pomodoro, :viewport,
     ]
   ]
 
-config :scenic, :assets,
-  module: PomodoroUi.Assets,
-  alias: [
-    roboto: "fonts/roboto.ttf"
-  ]
+config :scenic, :assets, module: PomodoroUi.Assets
 
 config :tzdata, :autoupdate, :disabled
 

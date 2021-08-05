@@ -50,7 +50,7 @@ defmodule Pomodoro.MixProject do
   defp dep(:scenic, :hex), do: {:scenic, "~> 0.10"}
 
   defp dep(:scenic, :github),
-    do: {:scenic, github: "boydm/scenic", ref: "7c6b7ef", override: true}
+    do: {:scenic, github: "boydm/scenic", ref: "d47a82c", override: true}
 
   defp dep(:scenic, :path), do: {:scenic, path: "../forks/scenic", override: true}
 
@@ -59,7 +59,7 @@ defmodule Pomodoro.MixProject do
   defp dep(:scenic_driver_glfw, :github),
     do:
       {:scenic_driver_glfw,
-       github: "boydm/scenic_driver_glfw", ref: "935c632", only: :dev, override: true}
+       github: "boydm/scenic_driver_glfw", ref: "a3feebd", only: :dev, override: true}
 
   defp dep(:scenic_driver_glfw, :path),
     do: {:scenic_driver_glfw, path: "../forks/scenic_driver_glfw", only: :dev, override: true}
