@@ -37,7 +37,7 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
     %PomodoroTimer{status: status} = pomodoro_timer
     text = timer_text(pomodoro_timer)
 
-    {:ok, {_type, fm}} = Scenic.Assets.Static.fetch(:roboto)
+    {:ok, {_type, fm}} = Scenic.Assets.Static.meta(:roboto)
     width = FontMetrics.width(text, @font_size, fm)
     height = @font_size
 
@@ -46,7 +46,7 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
     y_pos = -@font_size / 2
 
     graph
-    |> Scenic.Primitives.rect({width, height}, fill: fill, t: {x_pos, y_pos})
+    |> Scenic.Primitives.rect({width, height}, fill: fill, t: {x_pos, y_pos}, id: :timer_component, input: true)
   end
 
   @spec background_color(PomodoroTimer.status()) :: atom

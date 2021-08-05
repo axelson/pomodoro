@@ -24,7 +24,7 @@ defmodule PomodoroUi.Scene.MiniComponent do
 
     component_width = 110
     {t_x, t_y} = Keyword.get(opts, :t)
-    reset_btn_t = {t_x - component_width + 25, t_y}
+    reset_btn_t = {t_x - component_width + 10, t_y}
     time_display_t = {t_x, t_y + 145}
 
     pomodoro_timer_pid = Keyword.get(opts, :pomodoro_timer_pid)

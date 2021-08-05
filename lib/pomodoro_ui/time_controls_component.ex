@@ -66,10 +66,10 @@ defmodule PomodoroUi.TimeControlsComponent do
     )
   end
 
-  defp left_t(%State{x1: x1, y: y}) when not is_nil(x1) and not is_nil(y), do: {x1, y}
+  defp left_t(%State{x1: x1, y: y}) when not is_nil(x1) and not is_nil(y), do: {x1 - 15, y}
   defp left_t(%State{width: width, height: height}), do: {width / 2 - 100, height / 2 - 110}
 
-  defp right_t(%State{x2: x2, y: y}) when not is_nil(x2) and not is_nil(y), do: {x2, y}
+  defp right_t(%State{x2: x2, y: y}) when not is_nil(x2) and not is_nil(y), do: {x2 + 15, y}
   defp right_t(%State{width: width, height: height}), do: {width / 2 + 40, height / 2 - 110}
 
   defp visible(%PomodoroTimer{status: :initial}), do: true
