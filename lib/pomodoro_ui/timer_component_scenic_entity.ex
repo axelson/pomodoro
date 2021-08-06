@@ -46,7 +46,7 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
     y_pos = -@font_size / 2
 
     graph
-    |> Scenic.Primitives.rect({width, height}, fill: fill, t: {x_pos, y_pos}, id: :timer_component, input: true)
+    |> Scenic.Primitives.rect({width, height}, fill: fill, t: {x_pos, y_pos}, id: :timer_component, input: [:cursor_button])
   end
 
   @spec background_color(PomodoroTimer.status()) :: atom
