@@ -20,7 +20,6 @@ defmodule PomodoroUi.Scene.MiniComponent do
 
   @impl Scenic.Scene
   def init(scene, opts, scenic_opts) do
-    viewport = scenic_opts[:viewport]
 
     component_width = 110
     {t_x, t_y} = Keyword.get(opts, :t)
@@ -54,7 +53,6 @@ defmodule PomodoroUi.Scene.MiniComponent do
           mod: PomodoroUi.TimeControlsComponent,
           opts: [
             pomodoro_timer: pomodoro_timer,
-            viewport: viewport,
             x1: t_x - component_width / 2 - 30,
             x2: t_x + component_width / 2 - 30,
             y: t_y + 45
