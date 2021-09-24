@@ -129,6 +129,7 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   def handle_call({:register, pid}, _from, state) do
+    # TODO: Change this to a Registry
     Process.monitor(pid)
     state = add_listener(state, pid)
     {:reply, :ok, state}
@@ -240,6 +241,11 @@ defmodule Pomodoro.PomodoroTimer do
     {:noreply, state}
   end
 
+  def handle_info({:DOWN, _ref, :process, pid, :shutdown}, state) do
+    state = remove_listener(state, pid)
+    {:noreply, state}
+  end
+
   def handle_info(msg, state) do
     Logger.warn("PomodoroTimer Unhandled message: #{inspect(msg)}")
     {:noreply, state}
@@ -257,6 +263,10 @@ defmodule Pomodoro.PomodoroTimer do
 
   defp add_listener(%State{listeners: listeners} = state, pid) do
     %State{state | listeners: MapSet.put(listeners, pid)}
+  end
+
+  defp remove_listener(%State{listeners: listeners} = state, pid) do
+    %State{state | listeners: MapSet.delete(listeners, pid)}
   end
 
   defp tick(timer) do
