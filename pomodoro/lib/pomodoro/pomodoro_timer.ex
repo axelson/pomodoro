@@ -72,7 +72,7 @@ defmodule Pomodoro.PomodoroTimer do
       max_limbo_seconds: max_limbo_seconds,
       status: :initial,
       tick_duration: tick_duration,
-      slack_enabled: true
+      slack_enabled: false
     }
   end
 
