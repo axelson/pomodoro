@@ -6,7 +6,6 @@ defmodule Pomodoro.PomodoroTimer do
   use GenServer
   require Logger
 
-  @me __MODULE__
   @default_total_seconds 30 * 60
   @default_max_rest_seconds 15 * 60
   @default_max_limbo_seconds 15 * 60
@@ -78,7 +77,7 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   def start_link(opts) do
-    GenServer.start_link(@me, opts, name: @me)
+    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
   @impl GenServer
@@ -87,39 +86,39 @@ defmodule Pomodoro.PomodoroTimer do
     {:ok, state}
   end
 
-  def get_timer(name \\ @me) do
+  def get_timer(name \\ __MODULE__) do
     GenServer.call(name, :get_timer)
   end
 
-  def register(pid, name \\ @me) do
+  def register(pid, name \\ __MODULE__) do
     GenServer.call(name, {:register, pid})
   end
 
-  def start_ticking(name \\ @me) do
+  def start_ticking(name \\ __MODULE__) do
     GenServer.call(name, :start_ticking)
   end
 
-  def pause(name \\ @me) do
+  def pause(name \\ __MODULE__) do
     GenServer.call(name, :pause)
   end
 
-  def add_time(name \\ @me, seconds) do
+  def add_time(name \\ __MODULE__, seconds) do
     GenServer.call(name, {:add_time, seconds})
   end
 
-  def subtract_time(name \\ @me, seconds) do
+  def subtract_time(name \\ __MODULE__, seconds) do
     GenServer.call(name, {:subtract_time, seconds})
   end
 
-  def rest(name \\ @me) do
+  def rest(name \\ __MODULE__) do
     GenServer.call(name, :rest)
   end
 
-  def reset(name \\ @me, opts \\ []) do
+  def reset(name \\ __MODULE__, opts \\ []) do
     GenServer.call(name, {:reset, opts})
   end
 
-  def set_slack_enabled_status(name \\ @me, value) do
+  def set_slack_enabled_status(name \\ __MODULE__, value) do
     GenServer.call(name, {:set_slack_enabled_status, value})
   end
 
