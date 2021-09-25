@@ -36,6 +36,7 @@ defmodule Pomodoro.MixProject do
       dep(:scenic_live_reload, :path),
       {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
       {:truetype_metrics, "~> 0.5.1"},
+      {:erlexec, "~> 1.18"},
       {:slack, "~> 0.19"}
     ]
   end

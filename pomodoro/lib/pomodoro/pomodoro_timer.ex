@@ -5,6 +5,7 @@ defmodule Pomodoro.PomodoroTimer do
 
   use GenServer
   require Logger
+  alias Pomodoro.SoundPlayer
 
   @default_total_seconds 30 * 60
   @default_max_rest_seconds 15 * 60
@@ -290,12 +291,15 @@ defmodule Pomodoro.PomodoroTimer do
     timer =
       cond do
         status == :running && seconds_remaining <= 0 ->
+          Pomodoro.SoundPlayer.play(:timer_finished)
           %__MODULE__{timer | status: :limbo}
 
         status == :limbo && seconds_remaining <= -max_limbo_seconds ->
+          Pomodoro.SoundPlayer.play(:limbo_finished)
           %__MODULE__{timer | status: :limbo_finished}
 
         status == :resting && seconds_remaining <= -max_rest_seconds ->
+          Pomodoro.SoundPlayer.play(:resting_finished)
           %__MODULE__{timer | status: :finished}
 
         true ->
