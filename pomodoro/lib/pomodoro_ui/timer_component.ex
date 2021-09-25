@@ -52,7 +52,7 @@ defmodule PomodoroUi.TimerComponent do
   end
 
   @impl Scenic.Scene
-  def handle_input({:cursor_button, {0, :press, _, _}}, :timer_component, scene) do
+  def handle_input({:cursor_button, {:btn_left, 1, _, _}}, :timer_component, scene) do
     state = scene.assigns.state
     %State{graph: graph, pomodoro_timer: pomodoro_timer} = state
     %PomodoroTimer{status: status} = pomodoro_timer
@@ -76,8 +76,8 @@ defmodule PomodoroUi.TimerComponent do
     {:noreply, scene}
   end
 
-  def handle_input(_input, _context, scene) do
-    # IO.warn("Unhandled input!: #{inspect(input)}")
+  def handle_input(input, _context, scene) do
+    Logger.warn("Unhandled input!: #{inspect(input)}")
     {:noreply, scene}
   end
 
