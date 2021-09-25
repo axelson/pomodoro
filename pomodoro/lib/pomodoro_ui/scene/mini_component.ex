@@ -19,25 +19,19 @@ defmodule PomodoroUi.Scene.MiniComponent do
   def validate(data), do: {:ok, data}
 
   @impl Scenic.Scene
-  def init(scene, opts, scenic_opts) do
+  def init(scene, opts, _scenic_opts) do
+    pomodoro_timer_pid =
+      Keyword.get_lazy(opts, :pomodoro_timer_pid, fn ->
+        {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link([])
+        pomodoro_timer_pid
+      end)
+
+    pomodoro_timer = PomodoroTimer.get_timer()
 
     component_width = 110
     {t_x, t_y} = Keyword.get(opts, :t)
     reset_btn_t = {t_x - component_width + 10, t_y}
     time_display_t = {t_x, t_y + 145}
-
-    pomodoro_timer_pid = Keyword.get(opts, :pomodoro_timer_pid)
-
-    {pomodoro_timer, pomodoro_timer_pid} =
-      if pomodoro_timer_pid do
-        pomodoro_timer = Keyword.fetch!(opts, :pomodoro_timer)
-        {pomodoro_timer, pomodoro_timer_pid}
-      else
-        timer_opts = []
-        {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link(timer_opts)
-        pomodoro_timer = PomodoroTimer.get_timer()
-        {pomodoro_timer, pomodoro_timer_pid}
-      end
 
     graph =
       Graph.build(font: :roboto)

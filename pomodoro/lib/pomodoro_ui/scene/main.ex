@@ -12,18 +12,19 @@ defmodule PomodoroUi.Scene.Main do
   end
 
   @impl Scenic.Scene
-  def init(scene, _, _scenic_opts) do
+  def init(scene, opts, _scenic_opts) do
     %Scenic.ViewPort{size: {width, height}} = scene.viewport
+
+    pomodoro_timer_pid =
+      Keyword.get_lazy(opts, :pomodoro_timer_pid, fn ->
+        {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link([])
+        pomodoro_timer_pid
+      end)
+
+    pomodoro_timer = PomodoroTimer.get_timer()
 
     t = {width / 2, height / 2}
 
-    # instantiate a timer
-    timer_opts = []
-    # timer_opts = [total_seconds: 2]
-    {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link(timer_opts)
-    pomodoro_timer = PomodoroTimer.get_timer()
-
-    # Instantiate a timer component
     graph =
       Graph.build(font: :roboto)
       |> PomodoroUi.TimerComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)

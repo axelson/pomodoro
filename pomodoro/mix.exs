@@ -45,14 +45,14 @@ defmodule Pomodoro.MixProject do
 
   defp dep(:boundary, :hex), do: {:boundary, "~> 0.8"}
   defp dep(:boundary, :github), do: {:boundary, github: "sasa1977/boundary"}
-  defp dep(:boundary, :path), do: {:boundary, path: "../forks/boundary"}
+  defp dep(:boundary, :path), do: {:boundary, path: "~/dev/forks/boundary"}
 
   defp dep(:scenic, :hex), do: {:scenic, "~> 0.10"}
 
   defp dep(:scenic, :github),
     do: {:scenic, github: "boydm/scenic", branch: "v0.11", override: true}
 
-  defp dep(:scenic, :path), do: {:scenic, path: "../forks/scenic", override: true}
+  defp dep(:scenic, :path), do: {:scenic, path: "~/dev/forks/scenic", override: true}
 
   defp dep(:scenic_driver_glfw, :hex), do: {:scenic_driver_glfw, "~> 0.10", only: :dev}
 
@@ -62,14 +62,14 @@ defmodule Pomodoro.MixProject do
        github: "boydm/scenic_driver_glfw", branch: "v0.11", only: :dev, override: true}
 
   defp dep(:scenic_driver_glfw, :path),
-    do: {:scenic_driver_glfw, path: "../forks/scenic_driver_glfw", only: :dev, override: true}
+    do: {:scenic_driver_glfw, path: "~/dev/forks/scenic_driver_glfw", only: :dev, override: true}
 
   defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.2.0", only: :dev}
 
   defp dep(:scenic_live_reload, :path),
-    do: {:scenic_live_reload, path: "../scenic_live_reload", only: :dev}
+    do: {:scenic_live_reload, path: "~/dev/scenic_live_reload", only: :dev}
 
-  defp dep(:cortex, :path), do: {:cortex, path: "../forks/cortex", only: [:dev, :test]}
+  defp dep(:cortex, :path), do: {:cortex, path: "~/dev/forks/cortex", only: [:dev, :test]}
   defp dep(:cortex, :hex), do: {:cortex, "~> 0.5", only: [:dev, :test]}
 
   defp dep(:priv_check, :hex), do: {:priv_check, "~> 0.2", only: [:dev, :test], runtime: false}
