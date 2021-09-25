@@ -291,15 +291,15 @@ defmodule Pomodoro.PomodoroTimer do
     timer =
       cond do
         status == :running && seconds_remaining <= 0 ->
-          Pomodoro.SoundPlayer.play(:timer_finished)
+          play_sound(:timer_finished)
           %__MODULE__{timer | status: :limbo}
 
         status == :limbo && seconds_remaining <= -max_limbo_seconds ->
-          Pomodoro.SoundPlayer.play(:limbo_finished)
+          play_sound(:limbo_finished)
           %__MODULE__{timer | status: :limbo_finished}
 
         status == :resting && seconds_remaining <= -max_rest_seconds ->
-          Pomodoro.SoundPlayer.play(:resting_finished)
+          play_sound(:resting_finished)
           %__MODULE__{timer | status: :finished}
 
         true ->
@@ -379,4 +379,8 @@ defmodule Pomodoro.PomodoroTimer do
   defp can_start_ticking?(:resting), do: false
   defp can_start_ticking?(:resting_paused), do: true
   defp can_start_ticking?(:finished), do: false
+
+  defp play_sound(sound) do
+    Task.start(fn -> SoundPlayer.play(sound) end)
+  end
 end
