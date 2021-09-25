@@ -26,7 +26,7 @@ defmodule PomodoroUi.Scene.MiniComponent do
         pomodoro_timer_pid
       end)
 
-    pomodoro_timer = PomodoroTimer.get_timer()
+    pomodoro_timer = PomodoroTimer.get_timer(pomodoro_timer_pid)
 
     component_width = 110
     {t_x, t_y} = Keyword.get(opts, :t)

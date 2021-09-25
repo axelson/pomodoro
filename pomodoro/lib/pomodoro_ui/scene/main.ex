@@ -21,7 +21,7 @@ defmodule PomodoroUi.Scene.Main do
         pomodoro_timer_pid
       end)
 
-    pomodoro_timer = PomodoroTimer.get_timer()
+    pomodoro_timer = PomodoroTimer.get_timer(pomodoro_timer_pid)
 
     t = {width / 2, height / 2}
 
