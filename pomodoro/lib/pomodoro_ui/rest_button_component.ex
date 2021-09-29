@@ -1,87 +1,54 @@
 defmodule PomodoroUi.RestButtonComponent do
-  @moduledoc """
-  Display a button to start an explicit rest, only if the main timer has finished
-  """
-  use Scenic.Component, has_children: true
-
-  alias Scenic.Graph
   alias Pomodoro.PomodoroTimer
+
+  @behaviour ScenicUtils.ScenicRendererBehaviour
 
   defmodule State do
     defstruct [:graph, :pomodoro_timer]
   end
 
-  @doc false
-  @impl Scenic.Component
-  def validate(opts) do
-    if Keyword.keyword?(opts) do
-      {:ok, opts}
-    else
-      :invalid_data
-    end
-  end
+  @impl ScenicUtils.ScenicRendererBehaviour
+  def id(_state), do: :rest_button
 
-  @impl Scenic.Scene
-  def init(scene, opts, _scenic_opts) do
+  @impl ScenicUtils.ScenicRendererBehaviour
+  def init(opts, _scenic_opts) do
     pomodoro_timer = Keyword.fetch!(opts, :pomodoro_timer)
     PomodoroTimer.register(self())
 
-    graph =
-      Graph.build()
-      |> draw(pomodoro_timer)
-
     state = %State{
-      graph: graph,
       pomodoro_timer: pomodoro_timer
     }
 
-    scene =
-      scene
-      |> assign(:state, state)
-      |> push_graph(graph)
-
-    {:ok, scene}
+    {:ok, state}
   end
 
-  @impl GenServer
-  def handle_info({:pomodoro_timer, pomodoro_timer}, scene) do
-    state = scene.assigns.state
-    %State{graph: graph} = state
-
-    graph =
-      Graph.modify(graph, :btn_rest, fn graph ->
-        graph
-        |> draw(pomodoro_timer)
-      end)
-
-    state = %State{state | graph: graph}
-
-    scene =
-      scene
-      |> assign(:state, state)
-      |> push_graph(graph)
-
-    {:noreply, scene}
+  def handle_message({:pomodoro_timer, pomodoro_timer}, state) do
+    state = %State{state | pomodoro_timer: pomodoro_timer}
+    {:redraw, state}
   end
 
-  defp draw(graph, pomodoro_timer) do
-    text = "Rest"
-    font_size = 40
-
-    {:ok, {_type, fm}} = Scenic.Assets.Static.meta(:roboto)
-    ascent = FontMetrics.ascent(font_size, fm)
-    fm_width = FontMetrics.width(text, font_size, fm)
-
-    width = fm_width + ascent + ascent
-    x_pos = -width / 2
+  @impl ScenicUtils.ScenicRendererBehaviour
+  def draw(graph, state) do
+    %State{pomodoro_timer: pomodoro_timer} = state
 
     graph
-    |> Scenic.Components.button(text,
-      id: :btn_rest,
-      t: {x_pos, 70},
-      button_font_size: 40,
+    |> ScenicContrib.IconComponent.add_to_graph(
+      [
+        icon: {:pomodoro, "images/timer_break_rest.png"},
+        on_press_icon: {:pomodoro, "images/timer_break_select.png"},
+        width: 46,
+        height: 62,
+        on_click: &on_rest/0
+      ],
+      id: :btn_rest_icon,
+      t: {522, 367},
       hidden: hidden(pomodoro_timer)
     )
+  end
+
+  defp on_rest do
+    Process.sleep(100)
+    :ok = PomodoroTimer.rest()
   end
 
   defp hidden(%PomodoroTimer{status: :initial}), do: true

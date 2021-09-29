@@ -6,6 +6,7 @@ defmodule PomodoroUi.TimerComponent do
   use Scenic.Component, has_children: false
 
   require Logger
+  require ScenicContrib.Utils
   alias Scenic.Graph
   alias Pomodoro.PomodoroTimer
 

@@ -14,11 +14,39 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
       fn g ->
         g
         |> background_render(pomodoro_timer)
+        |> timer_label_render(pomodoro_timer)
         |> text_render(pomodoro_timer)
       end,
       id: id(pomodoro_timer)
     )
   end
+
+  def timer_label_render(graph, pomodoro_timer) do
+    {width, height} = {85, 71}
+
+    fill =
+      case timer_label_fill_type(pomodoro_timer.status) do
+        :none -> :clear
+        :working -> {:image, {:pomodoro, "images/timer_label_working.png"}}
+        :resting -> {:image, {:pomodoro, "images/timer_label_resting.png"}}
+      end
+
+    graph
+    |> Scenic.Primitives.rect(
+      {width, height},
+      fill: fill,
+      t: {-width / 2, -150}
+    )
+  end
+
+  defp timer_label_fill_type(:initial), do: :none
+  defp timer_label_fill_type(:running), do: :working
+  defp timer_label_fill_type(:running_paused), do: :working
+  defp timer_label_fill_type(:limbo), do: :none
+  defp timer_label_fill_type(:limbo_finished), do: :none
+  defp timer_label_fill_type(:resting), do: :resting
+  defp timer_label_fill_type(:resting_paused), do: :resting
+  defp timer_label_fill_type(:finished), do: :resting
 
   def text_render(graph, pomodoro_timer) do
     text = timer_text(pomodoro_timer)
@@ -34,31 +62,23 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
   end
 
   def background_render(graph, pomodoro_timer) do
-    %PomodoroTimer{status: status} = pomodoro_timer
     text = timer_text(pomodoro_timer)
 
     {:ok, {_type, fm}} = Scenic.Assets.Static.meta(:roboto)
     width = FontMetrics.width(text, @font_size, fm)
     height = @font_size
 
-    fill = background_color(status)
     x_pos = -width / 2
     y_pos = -@font_size / 2
 
     graph
-    |> Scenic.Primitives.rect({width, height}, fill: fill, t: {x_pos, y_pos}, id: :timer_component, input: [:cursor_button])
+    |> Scenic.Primitives.rect({width, height},
+      fill: :clear,
+      t: {x_pos, y_pos},
+      id: :timer_component,
+      input: [:cursor_button]
+    )
   end
-
-  @spec background_color(PomodoroTimer.status()) :: atom
-  defp background_color(status)
-  defp background_color(:initial), do: :green
-  defp background_color(:running), do: :red
-  defp background_color(:running_paused), do: :dark_khaki
-  defp background_color(:limbo), do: :purple
-  defp background_color(:limbo_finished), do: :purple
-  defp background_color(:resting), do: :blue
-  defp background_color(:resting_paused), do: :dodger_blue
-  defp background_color(:finished), do: :purple
 
   def timer_text(pomodoro_timer) do
     %PomodoroTimer{seconds_remaining: seconds_remaining} = pomodoro_timer

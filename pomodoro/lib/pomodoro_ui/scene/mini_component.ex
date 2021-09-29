@@ -5,6 +5,7 @@ defmodule PomodoroUi.Scene.MiniComponent do
 
   use Scenic.Component
   require Logger
+  require ScenicContrib.Utils
 
   alias Pomodoro.PomodoroTimer
   alias Scenic.Graph
@@ -30,7 +31,6 @@ defmodule PomodoroUi.Scene.MiniComponent do
 
     component_width = 110
     {t_x, t_y} = Keyword.get(opts, :t)
-    reset_btn_t = {t_x - component_width + 10, t_y}
     time_display_t = {t_x, t_y + 145}
 
     graph =
@@ -38,10 +38,23 @@ defmodule PomodoroUi.Scene.MiniComponent do
       |> PomodoroUi.TimerComponent.add_to_graph([pomodoro_timer: pomodoro_timer],
         t: time_display_t
       )
-      |> PomodoroUi.RestButtonComponent.add_to_graph([pomodoro_timer: pomodoro_timer],
-        t: time_display_t
+      |> ScenicUtils.ScenicRendererBehaviour.add_to_graph(
+        mod: PomodoroUi.RestButtonComponent,
+      opts: [
+        pomodoro_timer: pomodoro_timer
+      ]
       )
-      |> Scenic.Components.button("Reset", id: :btn_reset, t: reset_btn_t, button_font_size: 20)
+      |> ScenicContrib.IconComponent.add_to_graph(
+        [
+          icon: {:pomodoro, "images/timer_reset_rest.png"},
+          on_press_icon: {:pomodoro, "images/timer_reset_select.png"},
+          width: 46,
+          height: 62,
+          on_click: &on_reset/0
+        ],
+        id: :btn_reset,
+        t: {463, 367}
+      )
       |> ScenicUtils.ScenicRendererBehaviour.add_to_graph(
         [
           mod: PomodoroUi.TimeControlsComponent,
@@ -119,5 +132,10 @@ defmodule PomodoroUi.Scene.MiniComponent do
   defp reset_timer(state) do
     %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
     :ok = PomodoroTimer.reset(pomodoro_timer_pid)
+  end
+
+  defp on_reset do
+    Process.sleep(100)
+    :ok = PomodoroTimer.reset()
   end
 end

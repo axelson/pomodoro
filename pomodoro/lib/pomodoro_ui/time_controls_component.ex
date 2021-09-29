@@ -43,34 +43,52 @@ defmodule PomodoroUi.TimeControlsComponent do
 
     graph
     |> Scenic.Primitives.group(
-      fn g -> render_buttons(g, state, pomodoro_timer) end,
+      fn g -> render_buttons(g, pomodoro_timer) end,
       id: :time_controls
     )
   end
 
-  defp render_buttons(g, state, pomodoro_timer) do
+  defp render_buttons(g, pomodoro_timer) do
     g
-    |> Scenic.Components.button("-",
-      id: :btn_subtract_time,
-      t: left_t(state),
-      width: 60,
-      button_font_size: 30,
+    |> ScenicContrib.IconComponent.add_to_graph(
+      [
+        icon: {:pomodoro, "images/timer_plus_rest.png"},
+        on_press_icon: {:pomodoro, "images/timer_plus_select.png"},
+        width: 53,
+        height: 43,
+        on_click: &on_plus/0
+      ],
+      id: :btn_add_time,
+      t: {602, 385},
       hidden: !visible(pomodoro_timer)
     )
-    |> Scenic.Components.button("+",
-      id: :btn_add_time,
-      t: right_t(state),
-      width: 60,
-      button_font_size: 30,
+    |> ScenicContrib.IconComponent.add_to_graph(
+      [
+        icon: {:pomodoro, "images/timer_minus_rest.png"},
+        on_press_icon: {:pomodoro, "images/timer_minus_select.png"},
+        width: 53,
+        height: 43,
+        on_click: &on_minus/0
+      ],
+      id: :btn_minus,
+      t: {663, 385},
       hidden: !visible(pomodoro_timer)
     )
   end
 
-  defp left_t(%State{x1: x1, y: y}) when not is_nil(x1) and not is_nil(y), do: {x1 - 15, y}
-  defp left_t(%State{width: width, height: height}), do: {width / 2 - 100, height / 2 - 110}
+  # Multiple HACKS here. The sleep is so that the timer doesn't get re-rendered
+  # before it finishes showing the pressed state. I should investigate how the
+  # official scenic button handles this
+  # Other hack is sending a message directly to the pomodoro timer
+  defp on_minus do
+    Process.sleep(100)
+    :ok = PomodoroTimer.subtract_time(5 * 60)
+  end
 
-  defp right_t(%State{x2: x2, y: y}) when not is_nil(x2) and not is_nil(y), do: {x2 + 15, y}
-  defp right_t(%State{width: width, height: height}), do: {width / 2 + 40, height / 2 - 110}
+  defp on_plus do
+    Process.sleep(100)
+    PomodoroTimer.add_time(5 * 60)
+  end
 
   defp visible(%PomodoroTimer{status: :initial}), do: true
   defp visible(%PomodoroTimer{status: :running}), do: false

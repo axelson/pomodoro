@@ -24,3 +24,4 @@ pomodoro-*.tar
 
 .elixir_ls
 .env
+priv/__scenic/
