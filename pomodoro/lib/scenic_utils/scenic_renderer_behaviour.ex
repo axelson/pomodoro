@@ -12,6 +12,7 @@ defmodule ScenicUtils.ScenicRendererBehaviour do
   @callback id(any) :: id
   @callback init(opts :: Keyword.t(), scenic_opts :: Keyword.t()) :: {:ok, any}
   @callback draw(Scenic.Graph.t(), any) :: Scenic.Graph.t()
+  @callback handle_message(any, any) :: any
 
   defmodule State do
     defstruct [:mod, :graph, :component_state]
