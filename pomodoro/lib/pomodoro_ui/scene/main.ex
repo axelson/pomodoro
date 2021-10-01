@@ -28,7 +28,6 @@ defmodule PomodoroUi.Scene.Main do
     graph =
       Graph.build(font: :roboto)
       |> PomodoroUi.TimerComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
-      |> PomodoroUi.RestButtonComponent.add_to_graph([pomodoro_timer: pomodoro_timer], t: t)
       |> Scenic.Components.button("Reset", id: :btn_reset, t: {10, 10}, button_font_size: 40)
       |> ScenicUtils.ScenicRendererBehaviour.add_to_graph(
         [
