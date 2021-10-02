@@ -209,6 +209,7 @@ defmodule Pomodoro.PomodoroTimer do
       |> cancel_timer()
       |> maybe_schedule_tick()
 
+    play_sound(:rest_start)
     notify_update(state)
     update_slack_status(timer)
     {:reply, :ok, state}

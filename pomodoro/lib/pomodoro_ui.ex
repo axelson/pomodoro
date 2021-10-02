@@ -6,7 +6,10 @@ defmodule PomodoroUi do
 
   def start(_type, _args) do
     children =
-      [maybe_start_scenic()]
+      [
+        {Task.Supervisor, name: :pomodoro_task_supervisor},
+        maybe_start_scenic()
+      ]
       |> List.flatten()
 
     Supervisor.start_link(children, strategy: :one_for_one)
