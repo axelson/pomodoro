@@ -40,9 +40,9 @@ defmodule PomodoroUi.Scene.MiniComponent do
       )
       |> ScenicUtils.ScenicRendererBehaviour.add_to_graph(
         mod: PomodoroUi.RestButtonComponent,
-      opts: [
-        pomodoro_timer: pomodoro_timer
-      ]
+        opts: [
+          pomodoro_timer: pomodoro_timer
+        ]
       )
       |> ScenicContrib.IconComponent.add_to_graph(
         [

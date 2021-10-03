@@ -26,3 +26,4 @@ pomodoro-*.tar
 .env
 priv/__scenic/
 priv/sounds/extra
+priv/database.db*

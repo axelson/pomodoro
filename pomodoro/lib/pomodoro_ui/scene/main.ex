@@ -17,8 +17,10 @@ defmodule PomodoroUi.Scene.Main do
 
     pomodoro_timer_pid =
       Keyword.get_lazy(opts, :pomodoro_timer_pid, fn ->
-        {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link([])
-        pomodoro_timer_pid
+        case PomodoroTimer.start_link([]) do
+          {:ok, pomodoro_timer_pid} -> pomodoro_timer_pid
+          {:error, {:already_started, pid}} -> pid
+        end
       end)
 
     pomodoro_timer = PomodoroTimer.get_timer(pomodoro_timer_pid)
@@ -35,6 +37,12 @@ defmodule PomodoroUi.Scene.Main do
           opts: [pomodoro_timer: pomodoro_timer, width: width, height: height]
         ],
         []
+      )
+      |> ScenicUtils.ScenicRendererBehaviour.add_to_graph(
+        mod: PomodoroUi.RestButtonComponent,
+        opts: [
+          pomodoro_timer: pomodoro_timer
+        ]
       )
       |> maybe_add_update_slack_controls(Pomodoro.slack_controls_enabled?())
       |> Launcher.HiddenHomeButton.add_to_graph(on_switch: fn -> send(self(), :reset) end)

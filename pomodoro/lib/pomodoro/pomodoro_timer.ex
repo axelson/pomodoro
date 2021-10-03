@@ -13,6 +13,7 @@ defmodule Pomodoro.PomodoroTimer do
   @default_tick_duration 1_000
 
   defstruct [
+    :pomodoro_log_id,
     :total_seconds,
     :seconds_remaining,
     :max_rest_seconds,
@@ -42,6 +43,7 @@ defmodule Pomodoro.PomodoroTimer do
           | :resting_paused
           | :finished
   @type t :: %__MODULE__{
+          pomodoro_log_id: binary,
           total_seconds: pos_integer,
           # Counts down from total_seconds to -max_rest_seconds
           seconds_remaining: integer,
@@ -154,7 +156,17 @@ defmodule Pomodoro.PomodoroTimer do
         timer
       end
 
+    # Maybe I should've used a state machine
+    timer =
+      if status == :initial && timer.status == :running do
+        if timer.total_seconds > 0, do: Pomodoro.SoundPlayer.play(:pomodoro_start)
+        record_pomodoro_start(timer)
+      else
+        timer
+      end
+
     state = %State{state | timer: timer}
+
     notify_update(state)
     update_slack_status(timer)
     state = maybe_schedule_tick(state)
@@ -181,8 +193,15 @@ defmodule Pomodoro.PomodoroTimer do
 
   def handle_call({:add_time, seconds}, _from, state) do
     %State{timer: timer} = state
-    %__MODULE__{seconds_remaining: seconds_remaining} = timer
-    timer = %__MODULE__{timer | seconds_remaining: seconds_remaining + seconds}
+    %__MODULE__{seconds_remaining: seconds_remaining, total_seconds: total_seconds} = timer
+
+    timer = %__MODULE__{
+      timer
+      | seconds_remaining: seconds_remaining + seconds,
+        total_seconds: total_seconds + seconds
+    }
+
+    start_task(fn -> Pomodoro.update_pomodoro_log(timer) end)
     state = %State{state | timer: timer}
     notify_update(state)
     {:reply, :ok, state}
@@ -190,9 +209,17 @@ defmodule Pomodoro.PomodoroTimer do
 
   def handle_call({:subtract_time, seconds}, _from, state) do
     %State{timer: timer} = state
-    %__MODULE__{seconds_remaining: seconds_remaining} = timer
-    new_seconds = max(seconds_remaining - seconds, 0)
-    timer = %__MODULE__{timer | seconds_remaining: new_seconds}
+    %__MODULE__{seconds_remaining: seconds_remaining, total_seconds: total_seconds} = timer
+    new_seconds_remaining = max(seconds_remaining - seconds, 0)
+    new_total_seconds = max(total_seconds - seconds, 0)
+
+    timer = %__MODULE__{
+      timer
+      | seconds_remaining: new_seconds_remaining,
+        total_seconds: new_total_seconds
+    }
+
+    start_task(fn -> Pomodoro.update_pomodoro_log(timer) end)
     state = %State{state | timer: timer}
     notify_update(state)
     {:reply, :ok, state}
@@ -209,6 +236,7 @@ defmodule Pomodoro.PomodoroTimer do
       |> cancel_timer()
       |> maybe_schedule_tick()
 
+    start_task(fn -> Pomodoro.mark_rest_started(timer) end)
     play_sound(:rest_start)
     notify_update(state)
     update_slack_status(timer)
@@ -292,6 +320,7 @@ defmodule Pomodoro.PomodoroTimer do
     timer =
       cond do
         status == :running && seconds_remaining <= 0 ->
+          start_task(fn -> Pomodoro.mark_finished(timer) end)
           play_sound(:timer_finished)
           %__MODULE__{timer | status: :limbo}
 
@@ -300,6 +329,7 @@ defmodule Pomodoro.PomodoroTimer do
           %__MODULE__{timer | status: :limbo_finished}
 
         status == :resting && seconds_remaining <= -max_rest_seconds ->
+          start_task(fn -> Pomodoro.mark_rest_finished(timer) end)
           play_sound(:resting_finished)
           %__MODULE__{timer | status: :finished}
 
@@ -361,6 +391,21 @@ defmodule Pomodoro.PomodoroTimer do
     end)
   end
 
+  defp record_pomodoro_start(timer) do
+    case Pomodoro.record_pomodoro_start(timer.total_seconds) do
+      {:ok, pomodoro_log} ->
+        %{timer | pomodoro_log_id: pomodoro_log.id}
+
+      {:error, error} ->
+        Logger.error("Unable to record pomodoro log #{inspect(error)}")
+        timer
+    end
+  rescue
+    error ->
+      Logger.error("Unable to record pomodoro log #{inspect(error)}")
+      timer
+  end
+
   @spec tick?(status) :: boolean
   defp tick?(:initial), do: false
   defp tick?(:running), do: true
@@ -383,5 +428,9 @@ defmodule Pomodoro.PomodoroTimer do
 
   defp play_sound(sound) do
     Task.start(fn -> SoundPlayer.play(sound) end)
+  end
+
+  defp start_task(fun) when is_function(fun, 0) do
+    Task.Supervisor.start_child(:pomodoro_task_supervisor, fun)
   end
 end

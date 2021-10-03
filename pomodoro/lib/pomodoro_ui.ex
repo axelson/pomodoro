@@ -7,6 +7,8 @@ defmodule PomodoroUi do
   def start(_type, _args) do
     children =
       [
+        maybe_start_timer(),
+        Pomodoro.Repo,
         {Task.Supervisor, name: :pomodoro_task_supervisor},
         maybe_start_scenic()
       ]
@@ -23,6 +25,14 @@ defmodule PomodoroUi do
         {Scenic, [main_viewport_config]},
         {ScenicLiveReload, viewports: [main_viewport_config]}
       ]
+    else
+      []
+    end
+  end
+
+  defp maybe_start_timer do
+    if Application.get_env(:pomodoro, :viewport) do
+      Pomodoro.PomodoroTimer
     else
       []
     end
