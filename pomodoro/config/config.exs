@@ -33,6 +33,8 @@ config :launcher,
 
 config :pomodoro, ecto_repos: [Pomodoro.Repo]
 
+config :pomodoro, sound_directory: "priv/sounds"
+
 config :pomodoro, Pomodoro.Repo,
   database: "priv/database.db",
   migration_primary_key: [type: :binary_id],

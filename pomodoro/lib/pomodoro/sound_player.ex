@@ -14,9 +14,13 @@ defmodule Pomodoro.SoundPlayer do
     end)
   end
 
+  # Default sound is in the priv directory
+  def get_sound(:default), do:
+    Path.join([:code.priv_dir(:pomodoro), "sounds", sound_name(:default)])
+
   def get_sound(name) do
     filename = sound_name(name)
-    path = Path.join([:code.priv_dir(:pomodoro), "sounds", filename])
+    path = Path.join([Application.get_env(:pomodoro, :sound_directory), filename])
 
     if File.exists?(path) do
       path
