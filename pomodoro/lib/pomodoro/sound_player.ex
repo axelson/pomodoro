@@ -5,6 +5,7 @@ defmodule Pomodoro.SoundPlayer do
   defp sound_name(:rest_start), do: "rest_start.wav"
   defp sound_name(:limbo_finished), do: "limbo_finished.wav"
   defp sound_name(:resting_finished), do: "resting_finished.wav"
+  defp sound_name(:reset), do: "reset.wav"
 
   def play(name) do
     sound_path = get_sound(name) || get_sound(:default)

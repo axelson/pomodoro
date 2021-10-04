@@ -245,6 +245,7 @@ defmodule Pomodoro.PomodoroTimer do
 
   def handle_call({:reset, opts}, _from, state) do
     state = cancel_timer(state)
+    play_sound(:reset)
     timer = new(opts)
     state = %State{state | timer: timer}
     notify_update(state)
