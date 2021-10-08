@@ -38,7 +38,7 @@ defmodule Pomodoro.MixProject do
       {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
       {:truetype_metrics, "~> 0.5.1"},
       {:muontrap, "~> 0.6.1"},
-      {:slack, "~> 0.19"}
+      # {:slack, "~> 0.19"}
     ]
   end
 

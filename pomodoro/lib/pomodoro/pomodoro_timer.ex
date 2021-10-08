@@ -380,15 +380,15 @@ defmodule Pomodoro.PomodoroTimer do
   defp set_slack_status(seconds_remaining) do
     Task.start(fn ->
       minutes = ceil(seconds_remaining / 60)
-      Pomodoro.SlackControls.enable_dnd(minutes)
-      Pomodoro.SlackControls.set_status("mid-pomodoro", ":tomato:", duration_minutes: minutes)
+      # Pomodoro.SlackControls.enable_dnd(minutes)
+      # Pomodoro.SlackControls.set_status("mid-pomodoro", ":tomato:", duration_minutes: minutes)
     end)
   end
 
   defp clear_slack_status do
     Task.start(fn ->
-      Pomodoro.SlackControls.disable_dnd()
-      Pomodoro.SlackControls.clear_status()
+      # Pomodoro.SlackControls.disable_dnd()
+      # Pomodoro.SlackControls.clear_status()
     end)
   end
 
