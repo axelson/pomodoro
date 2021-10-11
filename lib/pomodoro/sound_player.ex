@@ -1,4 +1,6 @@
 defmodule Pomodoro.SoundPlayer do
+  require Logger
+
   defp sound_name(:default), do: "default.wav"
   defp sound_name(:pomodoro_start), do: "pomodoro_start.wav"
   defp sound_name(:timer_finished), do: "timer_finished.wav"
@@ -11,13 +13,17 @@ defmodule Pomodoro.SoundPlayer do
     sound_path = get_sound(name) || get_sound(:default)
 
     Task.Supervisor.start_child(:pomodoro_task_supervisor, fn ->
-      MuonTrap.cmd("aplay", ["--quiet", sound_path])
+      cond do
+        System.find_executable("aplay") -> MuonTrap.cmd("aplay", ["--quiet", sound_path])
+        System.find_executable("afplay") -> MuonTrap.cmd("afplay", [sound_path])
+        true -> Logger.warn("aplay and afplay not found, skipping sound playback")
+      end
     end)
   end
 
   # Default sound is in the priv directory
-  def get_sound(:default), do:
-    Path.join([:code.priv_dir(:pomodoro), "sounds", sound_name(:default)])
+  def get_sound(:default),
+    do: Path.join([:code.priv_dir(:pomodoro), "sounds", sound_name(:default)])
 
   def get_sound(name) do
     filename = sound_name(name)
