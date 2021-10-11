@@ -2,6 +2,8 @@
 
 A pomodoro timer that is customizeable on the fly.
 
+![Screenshot](contrib/screenshot.png)
+
 ## Installation
 
 Linux: Ensure that `aplay` is installed
