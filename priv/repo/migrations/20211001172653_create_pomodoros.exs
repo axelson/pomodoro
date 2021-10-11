@@ -11,9 +11,5 @@ defmodule Pomodoro.Repo.Migrations.CreatePomodoros do
 
       timestamps()
     end
-
-    create table(:interruptions) do
-      add :pomodoro_id, references(:pomodoros)
-    end
   end
 end
