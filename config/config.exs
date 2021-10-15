@@ -12,10 +12,11 @@ config :pomodoro, :viewport,
   #   {PomodoroUi.Scene.MiniComponent, t: {595, 69}, pomodoro_timer_pid: Pomodoro.PomodoroTimer},
   drivers: [
     [
-      module: Scenic.Driver.Glfw,
-      name: :glfw,
-      resizeable: false,
-      title: "Pomodoro Timer"
+      module: Scenic.Driver.Local,
+      window: [
+        title: "Pomodoro Timer"
+      ],
+      on_close: :stop_system
     ]
   ]
 

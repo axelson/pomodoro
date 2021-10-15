@@ -32,7 +32,7 @@ defmodule Pomodoro.MixProject do
       dep(:launcher, :github),
       {:sched_ex, "~> 1.1"},
       dep(:scenic, :github),
-      dep(:scenic_driver_glfw, :github),
+      dep(:scenic_driver_local, :github),
       dep(:scenic_live_reload, :path),
       {:ecto_sqlite3, "~> 0.5.4"},
       {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
@@ -56,15 +56,15 @@ defmodule Pomodoro.MixProject do
 
   defp dep(:scenic, :path), do: {:scenic, path: "~/dev/forks/scenic", override: true}
 
-  defp dep(:scenic_driver_glfw, :hex), do: {:scenic_driver_glfw, "~> 0.10", only: :dev}
+  defp dep(:scenic_driver_local, :hex), do: {:scenic_driver_local, "~> 0.10", only: :dev}
 
-  defp dep(:scenic_driver_glfw, :github),
+  defp dep(:scenic_driver_local, :github),
     do:
-      {:scenic_driver_glfw,
-       github: "boydm/scenic_driver_glfw", branch: "v0.11", only: :dev, override: true}
+      {:scenic_driver_local,
+       github: "ScenicFramework/scenic_driver_local", branch: "main", only: :dev, override: true}
 
-  defp dep(:scenic_driver_glfw, :path),
-    do: {:scenic_driver_glfw, path: "~/dev/forks/scenic_driver_glfw", only: :dev, override: true}
+  defp dep(:scenic_driver_local, :path),
+    do: {:scenic_driver_local, path: "~/dev/forks/scenic_driver_local", only: :dev, override: true}
 
   defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.2.0", only: :dev}
 
