@@ -23,8 +23,10 @@ defmodule PomodoroUi.Scene.MiniComponent do
   def init(scene, opts, _scenic_opts) do
     pomodoro_timer_pid =
       Keyword.get_lazy(opts, :pomodoro_timer_pid, fn ->
-        {:ok, pomodoro_timer_pid} = PomodoroTimer.start_link([])
-        pomodoro_timer_pid
+        case PomodoroTimer.start_link([]) do
+          {:ok, pomodoro_timer_pid} -> pomodoro_timer_pid
+          {:error, {:already_started, pid}} -> pid
+        end
       end)
 
     pomodoro_timer = PomodoroTimer.get_timer(pomodoro_timer_pid)
