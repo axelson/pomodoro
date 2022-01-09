@@ -34,10 +34,10 @@ defmodule Pomodoro.MixProject do
       dep(:scenic, :github),
       dep(:scenic_driver_local, :github),
       dep(:scenic_live_reload, :path),
-      {:ecto_sqlite3, "~> 0.5.4"},
+      {:ecto_sqlite3, "~> 0.7"},
       {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
       {:truetype_metrics, "~> 0.5.1"},
-      {:muontrap, "~> 0.6.1"},
+      {:muontrap, "~> 0.6.1 or ~> 1.0"},
       # {:slack, "~> 0.19"}
     ]
   end
