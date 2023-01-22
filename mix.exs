@@ -31,8 +31,8 @@ defmodule Pomodoro.MixProject do
       {:httpoison, "~> 1.6"},
       dep(:launcher, :github),
       {:sched_ex, "~> 1.1"},
-      dep(:scenic, :github),
-      dep(:scenic_driver_local, :github),
+      dep(:scenic, :hex),
+      dep(:scenic_driver_local, :hex),
       dep(:scenic_live_reload, :path),
       {:ecto_sqlite3, "~> 0.7"},
       {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
@@ -49,14 +49,14 @@ defmodule Pomodoro.MixProject do
   defp dep(:boundary, :github), do: {:boundary, github: "sasa1977/boundary"}
   defp dep(:boundary, :path), do: {:boundary, path: "~/dev/forks/boundary"}
 
-  defp dep(:scenic, :hex), do: {:scenic, "~> 0.10"}
+  defp dep(:scenic, :hex), do: {:scenic, "~> 0.11"}
 
   defp dep(:scenic, :github),
     do: {:scenic, github: "boydm/scenic", branch: "v0.11", override: true}
 
   defp dep(:scenic, :path), do: {:scenic, path: "~/dev/forks/scenic", override: true}
 
-  defp dep(:scenic_driver_local, :hex), do: {:scenic_driver_local, "~> 0.10", only: :dev}
+  defp dep(:scenic_driver_local, :hex), do: {:scenic_driver_local, "~> 0.11", only: :dev}
 
   defp dep(:scenic_driver_local, :github),
     do:
