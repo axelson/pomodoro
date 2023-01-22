@@ -57,7 +57,7 @@ defmodule PomodoroUi.TimeControlsComponent do
         on_press_icon: {:pomodoro, "images/timer_plus_select.png"},
         width: 53,
         height: 43,
-        on_click: &on_plus/0
+        on_click: &on_plus/1
       ],
       id: :btn_add_time,
       t: {602, 385},
@@ -69,7 +69,7 @@ defmodule PomodoroUi.TimeControlsComponent do
         on_press_icon: {:pomodoro, "images/timer_minus_select.png"},
         width: 53,
         height: 43,
-        on_click: &on_minus/0
+        on_click: &on_minus/1
       ],
       id: :btn_minus,
       t: {663, 385},
@@ -81,12 +81,12 @@ defmodule PomodoroUi.TimeControlsComponent do
   # before it finishes showing the pressed state. I should investigate how the
   # official scenic button handles this
   # Other hack is sending a message directly to the pomodoro timer
-  defp on_minus do
+  defp on_minus(_) do
     Process.sleep(100)
     :ok = PomodoroTimer.subtract_time(5 * 60)
   end
 
-  defp on_plus do
+  defp on_plus(_) do
     Process.sleep(100)
     PomodoroTimer.add_time(5 * 60)
   end

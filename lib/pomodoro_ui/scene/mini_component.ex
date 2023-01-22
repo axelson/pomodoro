@@ -52,7 +52,7 @@ defmodule PomodoroUi.Scene.MiniComponent do
           on_press_icon: {:pomodoro, "images/timer_reset_select.png"},
           width: 46,
           height: 62,
-          on_click: &on_reset/0
+          on_click: &on_reset/1
         ],
         id: :btn_reset,
         t: {463, 367}
@@ -136,7 +136,7 @@ defmodule PomodoroUi.Scene.MiniComponent do
     :ok = PomodoroTimer.reset(pomodoro_timer_pid)
   end
 
-  defp on_reset do
+  defp on_reset(_) do
     Process.sleep(100)
     :ok = PomodoroTimer.reset()
   end

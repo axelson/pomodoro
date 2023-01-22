@@ -39,7 +39,7 @@ defmodule PomodoroUi.RestButtonComponent do
         on_press_icon: {:pomodoro, "images/timer_break_select.png"},
         width: 46,
         height: 62,
-        on_click: &on_rest/0
+        on_click: &on_rest/1
       ],
       id: :btn_rest_icon,
       t: {522, 367},
@@ -47,7 +47,7 @@ defmodule PomodoroUi.RestButtonComponent do
     )
   end
 
-  defp on_rest do
+  defp on_rest(_) do
     Process.sleep(100)
     :ok = PomodoroTimer.rest()
   end
