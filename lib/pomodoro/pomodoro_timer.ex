@@ -93,6 +93,11 @@ defmodule Pomodoro.PomodoroTimer do
     GenServer.call(name, :get_timer)
   end
 
+  @doc """
+  Register to receive message updates when events happen
+
+  The calling process will receive a message for each tick
+  """
   def register(pid, name \\ __MODULE__) do
     GenServer.call(name, {:register, pid})
   end
@@ -389,6 +394,7 @@ defmodule Pomodoro.PomodoroTimer do
     Task.start(fn ->
       # Pomodoro.SlackControls.disable_dnd()
       # Pomodoro.SlackControls.clear_status()
+      nil
     end)
   end
 

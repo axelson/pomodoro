@@ -27,6 +27,7 @@ defmodule Pomodoro.MixProject do
       # dep(:cortex, :path),
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       dep(:priv_check, :hex),
+      {:happy_with, "~> 1.0"},
       {:jason, "~> 1.1"},
       {:httpoison, "~> 1.6"},
       dep(:launcher, :github),
@@ -64,7 +65,8 @@ defmodule Pomodoro.MixProject do
        github: "ScenicFramework/scenic_driver_local", branch: "main", only: :dev, override: true}
 
   defp dep(:scenic_driver_local, :path),
-    do: {:scenic_driver_local, path: "~/dev/forks/scenic_driver_local", only: :dev, override: true}
+    do:
+      {:scenic_driver_local, path: "~/dev/forks/scenic_driver_local", only: :dev, override: true}
 
   defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.2.0", only: :dev}
 

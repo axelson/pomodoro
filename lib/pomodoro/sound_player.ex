@@ -1,4 +1,5 @@
 defmodule Pomodoro.SoundPlayer do
+  import HappyWith
   require Logger
 
   defp sound_name(:default), do: "default.wav"
@@ -12,6 +13,12 @@ defmodule Pomodoro.SoundPlayer do
   def play(name) do
     sound_path = get_sound(name) || get_sound(:default)
 
+    if sound_path do
+      play_sound(sound_path)
+    end
+  end
+
+  def play_sound(sound_path) do
     Task.Supervisor.start_child(:pomodoro_task_supervisor, fn ->
       cond do
         System.find_executable("aplay") -> MuonTrap.cmd("aplay", ["--quiet", sound_path])
@@ -27,10 +34,15 @@ defmodule Pomodoro.SoundPlayer do
 
   def get_sound(name) do
     filename = sound_name(name)
-    path = Path.join([Application.get_env(:pomodoro, :sound_directory), filename])
 
-    if File.exists?(path) do
+    happy_with do
+      {:ok, sound_dir} <- Application.fetch_env(:pomodoro, :sound_directory)
+      path = Path.join([sound_dir, filename])
+      true <- File.exists?(path)
       path
+    else
+      _ ->
+        nil
     end
   end
 end
