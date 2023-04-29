@@ -126,6 +126,10 @@ defmodule Pomodoro.PomodoroTimer do
     GenServer.call(name, {:reset, opts})
   end
 
+  def next(name \\ __MODULE__) do
+    GenServer.call(name, :next)
+  end
+
   def set_slack_enabled_status(name \\ __MODULE__, value) do
     GenServer.call(name, {:set_slack_enabled_status, value})
   end
@@ -144,55 +148,12 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   def handle_call(:start_ticking, _from, state) do
-    %State{timer: timer} = state
-    %__MODULE__{status: status} = timer
-
-    timer =
-      if can_start_ticking?(status) do
-        new_status =
-          case timer.status do
-            :initial -> :running
-            :running_paused -> :running
-            :resting_paused -> :resting
-          end
-
-        %__MODULE__{timer | status: new_status}
-      else
-        timer
-      end
-
-    # Maybe I should've used a state machine
-    timer =
-      if status == :initial && timer.status == :running do
-        if timer.total_seconds > 0, do: Pomodoro.SoundPlayer.play(:pomodoro_start)
-        record_pomodoro_start(timer)
-      else
-        timer
-      end
-
-    state = %State{state | timer: timer}
-
-    notify_update(state)
-    update_slack_status(timer)
-    state = maybe_schedule_tick(state)
+    state = do_start_ticking(state)
     {:reply, :ok, state}
   end
 
   def handle_call(:pause, _from, state) do
-    state = cancel_timer(state)
-    %State{timer: timer} = state
-
-    new_status =
-      case timer.status do
-        :running -> :running_paused
-        :resting -> :resting_paused
-        status -> status
-      end
-
-    timer = %__MODULE__{timer | status: new_status}
-    state = %State{state | timer_ref: nil, timer: timer}
-    notify_update(state)
-    update_slack_status(timer)
+    state = do_pause(state)
     {:reply, :ok, state}
   end
 
@@ -231,30 +192,31 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   def handle_call(:rest, _from, state) do
-    %State{timer: timer} = state
-    new_status = :resting
-    timer = %__MODULE__{timer | status: new_status, seconds_remaining: 0}
-    state = %State{state | timer: timer}
-
-    state =
-      state
-      |> cancel_timer()
-      |> maybe_schedule_tick()
-
-    start_task(fn -> Pomodoro.mark_rest_started(timer) end)
-    play_sound(:rest_start)
-    notify_update(state)
-    update_slack_status(timer)
+    state = do_rest(state)
     {:reply, :ok, state}
   end
 
   def handle_call({:reset, opts}, _from, state) do
-    state = cancel_timer(state)
-    play_sound(:reset)
-    timer = new(opts)
-    state = %State{state | timer: timer}
-    notify_update(state)
-    update_slack_status(timer)
+    state = do_reset(state, opts)
+    {:reply, :ok, state}
+  end
+
+  def handle_call(:next, _from, state) do
+    %State{timer: timer} = state
+    %__MODULE__{status: status} = timer
+
+    state =
+      case status do
+        :initial -> do_start_ticking(state)
+        :running -> do_pause(state)
+        :running_paused -> do_start_ticking(state)
+        :limbo -> do_rest(state)
+        :limbo_finished -> do_rest(state)
+        :resting -> do_reset(state, [])
+        :resting_paused -> do_start_ticking(state)
+        :finished -> do_reset(state, [])
+      end
+
     {:reply, :ok, state}
   end
 
@@ -382,9 +344,10 @@ defmodule Pomodoro.PomodoroTimer do
     end
   end
 
-  defp set_slack_status(seconds_remaining) do
+  defp set_slack_status(_seconds_remaining) do
     Task.start(fn ->
-      minutes = ceil(seconds_remaining / 60)
+      nil
+      # minutes = ceil(seconds_remaining / 60)
       # Pomodoro.SlackControls.enable_dnd(minutes)
       # Pomodoro.SlackControls.set_status("mid-pomodoro", ":tomato:", duration_minutes: minutes)
     end)
@@ -411,6 +374,88 @@ defmodule Pomodoro.PomodoroTimer do
     error ->
       Logger.error("Unable to record pomodoro log #{inspect(error)}")
       timer
+  end
+
+  defp do_start_ticking(state) do
+    %State{timer: timer} = state
+    %__MODULE__{status: status} = timer
+
+    timer =
+      if can_start_ticking?(status) do
+        new_status =
+          case timer.status do
+            :initial -> :running
+            :running_paused -> :running
+            :resting_paused -> :resting
+          end
+
+        %__MODULE__{timer | status: new_status}
+      else
+        timer
+      end
+
+    # Maybe I should've used a state machine
+    timer =
+      if status == :initial && timer.status == :running do
+        if timer.total_seconds > 0, do: Pomodoro.SoundPlayer.play(:pomodoro_start)
+        record_pomodoro_start(timer)
+      else
+        timer
+      end
+
+    state = %State{state | timer: timer}
+
+    notify_update(state)
+    update_slack_status(timer)
+    maybe_schedule_tick(state)
+  end
+
+  defp do_pause(state) do
+    state = cancel_timer(state)
+    %State{timer: timer} = state
+
+    new_status =
+      case timer.status do
+        :running -> :running_paused
+        :resting -> :resting_paused
+        status -> status
+      end
+
+    timer = %__MODULE__{timer | status: new_status}
+    state = %State{state | timer_ref: nil, timer: timer}
+    notify_update(state)
+    update_slack_status(timer)
+
+    state
+  end
+
+  defp do_rest(state) do
+    %State{timer: timer} = state
+    new_status = :resting
+    timer = %__MODULE__{timer | status: new_status, seconds_remaining: 0}
+    state = %State{state | timer: timer}
+
+    state =
+      state
+      |> cancel_timer()
+      |> maybe_schedule_tick()
+
+    start_task(fn -> Pomodoro.mark_rest_started(timer) end)
+    play_sound(:rest_start)
+    notify_update(state)
+    update_slack_status(timer)
+
+    state
+  end
+
+  defp do_reset(state, opts) do
+    state = cancel_timer(state)
+    play_sound(:reset)
+    timer = new(opts)
+    state = %State{state | timer: timer}
+    notify_update(state)
+    update_slack_status(timer)
+    state
   end
 
   @spec tick?(status) :: boolean
