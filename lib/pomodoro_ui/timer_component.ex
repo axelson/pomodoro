@@ -48,7 +48,7 @@ defmodule PomodoroUi.TimerComponent do
 
   @impl Scenic.Scene
   def handle_event(event, _from, scene) do
-    Logger.warn("Unhandled event: #{inspect(event)}")
+    Logger.warning("Unhandled event: #{inspect(event)}")
     {:noreply, scene}
   end
 
@@ -78,7 +78,7 @@ defmodule PomodoroUi.TimerComponent do
   end
 
   def handle_input(input, _context, scene) do
-    Logger.warn("Unhandled input!: #{inspect(input)}")
+    Logger.warning("Unhandled input!: #{inspect(input)}")
     {:noreply, scene}
   end
 

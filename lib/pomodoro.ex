@@ -2,7 +2,7 @@ defmodule Pomodoro do
   @moduledoc """
   Documentation for Pomodoro.
   """
-  use Boundary, deps: [], exports: [PomodoroTimer]
+  use Boundary, deps: [ScenicUtils], exports: [PomodoroTimer]
   alias Pomodoro.Schemas
   alias Pomodoro.PomodoroTimer
 
@@ -34,8 +34,14 @@ defmodule Pomodoro do
         finished_at \\ NaiveDateTime.utc_now()
       ) do
     get_pomodoro_log!(pomodoro_timer.pomodoro_log_id)
-    |> Schemas.PomodoroLog.changeset(%{"finished_at" => finished_at})
-    |> Pomodoro.Repo.update()
+    |> case do
+      %Schemas.PomodoroLog{finished_at: nil} = pomodoro_log ->
+        Schemas.PomodoroLog.changeset(pomodoro_log, %{"finished_at" => finished_at})
+        |> Pomodoro.Repo.update()
+
+      pomodoro_log ->
+        pomodoro_log
+    end
   end
 
   def mark_rest_started(

@@ -122,6 +122,10 @@ defmodule Pomodoro.PomodoroTimer do
     GenServer.call(name, :rest)
   end
 
+  def finish(name \\ __MODULE__) do
+    GenServer.call(name, :finish)
+  end
+
   def reset(name \\ __MODULE__, opts \\ []) do
     GenServer.call(name, {:reset, opts})
   end
@@ -212,11 +216,16 @@ defmodule Pomodoro.PomodoroTimer do
         :running_paused -> do_start_ticking(state)
         :limbo -> do_rest(state)
         :limbo_finished -> do_rest(state)
-        :resting -> do_reset(state, [])
+        :resting -> do_finish(state)
         :resting_paused -> do_start_ticking(state)
         :finished -> do_reset(state, [])
       end
 
+    {:reply, :ok, state}
+  end
+
+  def handle_call(:finish, _from, state) do
+    state = do_finish(state)
     {:reply, :ok, state}
   end
 
@@ -229,7 +238,6 @@ defmodule Pomodoro.PomodoroTimer do
 
   @impl GenServer
   def handle_info(:tick, state) do
-    # IO.puts("tick")
     state = tick_and_notify(state)
 
     state =
@@ -245,7 +253,7 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   def handle_info(msg, state) do
-    Logger.warn("PomodoroTimer Unhandled message: #{inspect(msg)}")
+    Logger.warning("PomodoroTimer Unhandled message: #{inspect(msg)}")
     {:noreply, state}
   end
 
@@ -266,6 +274,9 @@ defmodule Pomodoro.PomodoroTimer do
   defp remove_listener(%State{listeners: listeners} = state, pid) do
     %State{state | listeners: MapSet.delete(listeners, pid)}
   end
+
+  # HACK: Don't tick when in the initial state
+  defp tick(%__MODULE__{status: :initial} = timer), do: timer
 
   defp tick(timer) do
     %__MODULE__{seconds_remaining: seconds_remaining} = timer
@@ -429,6 +440,38 @@ defmodule Pomodoro.PomodoroTimer do
     state
   end
 
+  defp do_finish(state) do
+    %State{timer: timer} = state
+
+    if timer.status in [:running, :limbo, :resting, :resting_paused] do
+      # TODO: Should this be a task?
+      start_task(fn ->
+        case timer.status do
+          status when status in [:running, :running_paused] ->
+            Pomodoro.mark_finished(timer)
+
+          status when status in [:limbo, :limbo_paused] ->
+            Pomodoro.mark_rest_started(timer)
+            Process.sleep(100)
+            Pomodoro.mark_rest_finished(timer)
+
+          status when status in [:resting, :resting_paused] ->
+            Pomodoro.mark_rest_finished(timer)
+        end
+      end)
+
+      play_sound(:reset)
+      timer = new()
+      state = %State{state | timer: timer}
+      notify_update(state)
+      update_slack_status(timer)
+      state
+    else
+      Logger.warning("Invalid finish_rest transition attempted")
+      state
+    end
+  end
+
   defp do_rest(state) do
     %State{timer: timer} = state
     new_status = :resting
@@ -440,7 +483,11 @@ defmodule Pomodoro.PomodoroTimer do
       |> cancel_timer()
       |> maybe_schedule_tick()
 
-    start_task(fn -> Pomodoro.mark_rest_started(timer) end)
+    start_task(fn ->
+      Pomodoro.mark_finished(timer)
+      Pomodoro.mark_rest_started(timer)
+    end)
+
     play_sound(:rest_start)
     notify_update(state)
     update_slack_status(timer)

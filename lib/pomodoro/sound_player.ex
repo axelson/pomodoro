@@ -23,7 +23,7 @@ defmodule Pomodoro.SoundPlayer do
       cond do
         System.find_executable("aplay") -> MuonTrap.cmd("aplay", ["--quiet", sound_path])
         System.find_executable("afplay") -> MuonTrap.cmd("afplay", [sound_path])
-        true -> Logger.warn("aplay and afplay not found, skipping sound playback")
+        true -> Logger.warning("aplay and afplay not found, skipping sound playback")
       end
     end)
   end

@@ -123,7 +123,7 @@ defmodule PomodoroUi.Scene.MiniComponent do
   end
 
   def handle_event(event, _from, scene) do
-    Logger.warn("Unhandled event: #{inspect(event)}")
+    Logger.warning("Unhandled event: #{inspect(event)}")
     {:halt, scene}
   end
 

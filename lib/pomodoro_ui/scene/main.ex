@@ -86,13 +86,13 @@ defmodule PomodoroUi.Scene.Main do
   end
 
   def handle_info(msg, scene) do
-    Logger.warn("Unhandled handle_info: #{inspect(msg)}")
+    Logger.warning("Unhandled handle_info: #{inspect(msg)}")
     {:noreply, scene}
   end
 
   @impl Scenic.Scene
   def handle_input(event, _hit_id, scene) do
-    Logger.warn("Unhandled input: #{inspect(event)}")
+    Logger.warning("Unhandled input: #{inspect(event)}")
     {:halt, scene}
   end
 
@@ -131,7 +131,7 @@ defmodule PomodoroUi.Scene.Main do
   end
 
   def handle_event(event, _from, scene) do
-    Logger.warn("Unhandled event: #{inspect(event)}")
+    Logger.warning("Unhandled event: #{inspect(event)}")
     {:noreply, scene}
   end
 
