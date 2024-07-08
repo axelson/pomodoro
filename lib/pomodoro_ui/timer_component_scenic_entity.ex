@@ -3,6 +3,8 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
 
   alias Scenic.Primitives
 
+  alias Pomodoro.PomodoroUtils
+
   @font_size 80
 
   def id(_), do: :timer_group
@@ -15,6 +17,8 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
         |> background_render(pomodoro_timer)
         |> timer_label_render(pomodoro_timer)
         |> text_render(pomodoro_timer)
+        |> extended_text(pomodoro_timer)
+        |> status_text(pomodoro_timer)
       end,
       id: id(pomodoro_timer)
     )
@@ -47,8 +51,33 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
   defp timer_label_fill_type(:resting_paused), do: :resting
   defp timer_label_fill_type(:finished), do: :resting
 
+  def status_text(graph, pomodoro_timer) do
+    graph
+    |> Scenic.Primitives.text("status: #{pomodoro_timer.status}",
+      id: :status_text,
+      t: {100, 10},
+      color: :white,
+      text_base: :top,
+      # This is for debugging so we leave it as hidden
+      hidden: true
+    )
+  end
+
+  def extended_text(graph, pomodoro_timer) do
+    text = PomodoroUtils.timer_text(pomodoro_timer.extended_seconds)
+
+    graph
+    |> Scenic.Primitives.text(text,
+      id: :extended_text,
+      t: {0, 50},
+      text_align: :center,
+      color: :white,
+      text_base: :middle
+    )
+  end
+
   def text_render(graph, pomodoro_timer) do
-    text = Pomodoro.PomodoroUtils.timer_text(pomodoro_timer)
+    text = PomodoroUtils.timer_text(pomodoro_timer.seconds_remaining)
 
     graph
     |> Primitives.text(text,
@@ -61,7 +90,7 @@ defimpl ScenicUtils.ScenicEntity, for: Pomodoro.PomodoroTimer do
   end
 
   def background_render(graph, pomodoro_timer) do
-    text = Pomodoro.PomodoroUtils.timer_text(pomodoro_timer)
+    text = PomodoroUtils.timer_text(pomodoro_timer.seconds_remaining)
 
     {:ok, {_type, fm}} = Scenic.Assets.Static.meta(:roboto)
     width = FontMetrics.width(text, @font_size, fm)

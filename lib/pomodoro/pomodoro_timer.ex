@@ -11,10 +11,12 @@ defmodule Pomodoro.PomodoroTimer do
   @default_max_rest_seconds 15 * 60
   @default_max_limbo_seconds 15 * 60
   @default_tick_duration 1_000
+  @default_extended_seconds 0
 
   defstruct [
     :pomodoro_log_id,
     :total_seconds,
+    :extended_seconds,
     :seconds_remaining,
     :max_rest_seconds,
     :max_limbo_seconds,
@@ -45,6 +47,8 @@ defmodule Pomodoro.PomodoroTimer do
   @type t :: %__MODULE__{
           pomodoro_log_id: binary,
           total_seconds: pos_integer,
+          # Counts the number of seconds elapsed past the total seconds
+          extended_seconds: pos_integer,
           # Counts down from total_seconds to -max_rest_seconds
           seconds_remaining: integer,
           max_rest_seconds: pos_integer,
@@ -53,12 +57,13 @@ defmodule Pomodoro.PomodoroTimer do
         }
 
   defmodule State do
-    defstruct [:listeners, :timer, :timer_ref]
+    defstruct [:listeners, :timer, :timer_ref, :initial_opts]
 
     @type t :: %__MODULE__{
-            listeners: any,
+            initial_opts: list(),
+            listeners: any(),
             timer: Pomodoro.PomodoroTimer.t(),
-            timer_ref: reference
+            timer_ref: reference()
           }
   end
 
@@ -67,8 +72,10 @@ defmodule Pomodoro.PomodoroTimer do
     max_rest_seconds = Keyword.get(opts, :max_rest_seconds, @default_max_rest_seconds)
     max_limbo_seconds = Keyword.get(opts, :max_limbo_seconds, @default_max_limbo_seconds)
     tick_duration = Keyword.get(opts, :tick_duration, @default_tick_duration)
+    extended_seconds = Keyword.get(opts, :extended_seconds, @default_extended_seconds)
 
     %__MODULE__{
+      extended_seconds: extended_seconds,
       total_seconds: total_seconds,
       seconds_remaining: total_seconds,
       max_rest_seconds: max_rest_seconds,
@@ -85,7 +92,7 @@ defmodule Pomodoro.PomodoroTimer do
 
   @impl GenServer
   def init(opts) do
-    state = %State{listeners: MapSet.new(), timer: new(opts)}
+    state = %State{listeners: MapSet.new(), timer: new(opts), initial_opts: opts}
     {:ok, state}
   end
 
@@ -201,6 +208,7 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   def handle_call({:reset, opts}, _from, state) do
+    opts = Keyword.merge(state.initial_opts, opts)
     state = do_reset(state, opts)
     {:reply, :ok, state}
   end
@@ -277,6 +285,16 @@ defmodule Pomodoro.PomodoroTimer do
 
   # HACK: Don't tick when in the initial state
   defp tick(%__MODULE__{status: :initial} = timer), do: timer
+
+  defp tick(%__MODULE__{status: :finished} = timer) do
+    %__MODULE__{extended_seconds: extended_seconds} = timer
+    %__MODULE__{timer | extended_seconds: extended_seconds + 1}
+  end
+
+  defp tick(%__MODULE__{status: :limbo_finished} = timer) do
+    %__MODULE__{extended_seconds: extended_seconds} = timer
+    %__MODULE__{timer | extended_seconds: extended_seconds + 1}
+  end
 
   defp tick(timer) do
     %__MODULE__{seconds_remaining: seconds_remaining} = timer
@@ -475,7 +493,7 @@ defmodule Pomodoro.PomodoroTimer do
   defp do_rest(state) do
     %State{timer: timer} = state
     new_status = :resting
-    timer = %__MODULE__{timer | status: new_status, seconds_remaining: 0}
+    timer = %__MODULE__{timer | status: new_status, seconds_remaining: 0, extended_seconds: 0}
     state = %State{state | timer: timer}
 
     state =
@@ -510,10 +528,10 @@ defmodule Pomodoro.PomodoroTimer do
   defp tick?(:running), do: true
   defp tick?(:running_paused), do: false
   defp tick?(:limbo), do: true
-  defp tick?(:limbo_finished), do: false
+  defp tick?(:limbo_finished), do: true
   defp tick?(:resting), do: true
   defp tick?(:resting_paused), do: false
-  defp tick?(:finished), do: false
+  defp tick?(:finished), do: true
 
   # TODO: Should this be replaced with a state machine library?
   defp can_start_ticking?(:initial), do: true
