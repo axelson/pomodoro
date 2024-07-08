@@ -29,7 +29,7 @@ defmodule Pomodoro.MixProject do
       dep(:priv_check, :hex),
       {:happy_with, "~> 1.0"},
       {:jason, "~> 1.1"},
-      {:httpoison, "~> 1.6"},
+      {:httpoison, "~> 2.0"},
       dep(:launcher, :github),
       {:sched_ex, "~> 1.1"},
       dep(:scenic, :hex),
