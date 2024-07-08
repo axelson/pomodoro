@@ -34,7 +34,7 @@ defmodule Pomodoro.MixProject do
       {:sched_ex, "~> 1.1"},
       dep(:scenic, :hex),
       dep(:scenic_driver_local, :hex),
-      dep(:scenic_live_reload, :path),
+      dep(:scenic_live_reload, :hex),
       {:ecto_sqlite3, "~> 0.7"},
       {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
       {:truetype_metrics, "~> 0.6"},
@@ -68,7 +68,7 @@ defmodule Pomodoro.MixProject do
     do:
       {:scenic_driver_local, path: "~/dev/forks/scenic_driver_local", only: :dev, override: true}
 
-  defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.2.0", only: :dev}
+  defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.3", only: :dev}
 
   defp dep(:scenic_live_reload, :path),
     do: {:scenic_live_reload, path: "~/dev/scenic_live_reload", only: :dev}
