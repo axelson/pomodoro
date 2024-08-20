@@ -35,7 +35,7 @@ defmodule Pomodoro.MixProject do
       dep(:scenic, :hex),
       dep(:scenic_driver_local, :hex),
       dep(:scenic_live_reload, :hex),
-      {:ecto_sqlite3, "~> 0.7"},
+      {:ecto_sqlite3, "~> 0.17"},
       # {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
       {:truetype_metrics, "~> 0.6"},
       {:muontrap, "~> 0.6.1 or ~> 1.0"}
