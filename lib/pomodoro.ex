@@ -29,6 +29,24 @@ defmodule Pomodoro do
     |> Pomodoro.Repo.update()
   end
 
+  def create_pomodoro_log(attrs) do
+    Schemas.PomodoroLog.changeset(%Schemas.PomodoroLog{}, attrs)
+    |> Pomodoro.Repo.insert()
+  end
+
+  def update_pomodoro_log(%Schemas.PomodoroLog{} = pomodoro_log, attrs) do
+    change_pomodoro_log(pomodoro_log, attrs)
+    |> Pomodoro.Repo.update()
+  end
+
+  def change_pomodoro_log(%Schemas.PomodoroLog{} = pomodoro_log, attrs \\ %{}) do
+    Schemas.PomodoroLog.changeset(pomodoro_log, attrs)
+  end
+
+  def delete_pomodoro_log(%Schemas.PomodoroLog{} = pomodoro_log) do
+    Pomodoro.Repo.delete(pomodoro_log)
+  end
+
   def mark_finished(
         %PomodoroTimer{} = pomodoro_timer,
         finished_at \\ NaiveDateTime.utc_now()
