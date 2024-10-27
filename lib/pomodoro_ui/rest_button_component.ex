@@ -13,7 +13,7 @@ defmodule PomodoroUi.RestButtonComponent do
   @impl ScenicUtils.ScenicRendererBehaviour
   def init(opts, _scenic_opts) do
     pomodoro_timer = Keyword.fetch!(opts, :pomodoro_timer)
-    PomodoroTimer.register(self())
+    PomodoroTimer.register()
 
     state = %State{
       pomodoro_timer: pomodoro_timer

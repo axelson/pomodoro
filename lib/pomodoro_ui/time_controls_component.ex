@@ -18,7 +18,7 @@ defmodule PomodoroUi.TimeControlsComponent do
     x1 = Keyword.get(opts, :x1)
     x2 = Keyword.get(opts, :x2)
     y = Keyword.get(opts, :y)
-    PomodoroTimer.register(self())
+    PomodoroTimer.register()
 
     state = %State{
       pomodoro_timer: pomodoro_timer,

@@ -21,7 +21,7 @@ defmodule Pomodoro.PomodoroTimer do
     :max_rest_seconds,
     :max_limbo_seconds,
     :status,
-    :tick_duration,
+    :tick_duration
   ]
 
   @typedoc """
@@ -56,11 +56,10 @@ defmodule Pomodoro.PomodoroTimer do
         }
 
   defmodule State do
-    defstruct [:listeners, :timer, :timer_ref, :initial_opts]
+    defstruct [:timer, :timer_ref, :initial_opts]
 
     @type t :: %__MODULE__{
             initial_opts: list(),
-            listeners: any(),
             timer: Pomodoro.PomodoroTimer.t(),
             timer_ref: reference()
           }
@@ -80,7 +79,7 @@ defmodule Pomodoro.PomodoroTimer do
       max_rest_seconds: max_rest_seconds,
       max_limbo_seconds: max_limbo_seconds,
       status: :initial,
-      tick_duration: tick_duration,
+      tick_duration: tick_duration
     }
   end
 
@@ -90,7 +89,7 @@ defmodule Pomodoro.PomodoroTimer do
 
   @impl GenServer
   def init(opts) do
-    state = %State{listeners: MapSet.new(), timer: new(opts), initial_opts: opts}
+    state = %State{timer: new(opts), initial_opts: opts}
     {:ok, state}
   end
 
@@ -98,13 +97,20 @@ defmodule Pomodoro.PomodoroTimer do
     GenServer.call(name, :get_timer)
   end
 
+  @deprecated "Use register/2 instead"
+  def register(_pid, _name \\ __MODULE__) do
+    register()
+  end
+
   @doc """
   Register to receive message updates when events happen
 
   The calling process will receive a message for each tick
   """
-  def register(pid, name \\ __MODULE__) do
-    GenServer.call(name, {:register, pid})
+  def register() do
+    Registry.register(registry(), :main, [])
+
+    :ok
   end
 
   def start_ticking(name \\ __MODULE__) do
@@ -143,13 +149,6 @@ defmodule Pomodoro.PomodoroTimer do
   def handle_call(:get_timer, _from, state) do
     %State{timer: timer} = state
     {:reply, timer, state}
-  end
-
-  def handle_call({:register, pid}, _from, state) do
-    # TODO: Change this to a Registry
-    Process.monitor(pid)
-    state = add_listener(state, pid)
-    {:reply, :ok, state}
   end
 
   def handle_call(:start_ticking, _from, state) do
@@ -242,11 +241,6 @@ defmodule Pomodoro.PomodoroTimer do
     {:noreply, state}
   end
 
-  def handle_info({:DOWN, _ref, :process, pid, :shutdown}, state) do
-    state = remove_listener(state, pid)
-    {:noreply, state}
-  end
-
   def handle_info(msg, state) do
     Logger.warning("PomodoroTimer Unhandled message: #{inspect(msg)}")
     {:noreply, state}
@@ -260,14 +254,6 @@ defmodule Pomodoro.PomodoroTimer do
     end
 
     %State{state | timer_ref: nil}
-  end
-
-  defp add_listener(%State{listeners: listeners} = state, pid) do
-    %State{state | listeners: MapSet.put(listeners, pid)}
-  end
-
-  defp remove_listener(%State{listeners: listeners} = state, pid) do
-    %State{state | listeners: MapSet.delete(listeners, pid)}
   end
 
   # HACK: Don't tick when in the initial state
@@ -327,9 +313,12 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   defp notify_update(state) do
-    %State{listeners: listeners, timer: timer} = state
+    %State{timer: timer} = state
     message = {:pomodoro_timer, timer}
-    Enum.each(listeners, &Process.send(&1, message, []))
+
+    Registry.dispatch(registry(), :main, fn entries ->
+      for {pid, _val} <- entries, do: send(pid, message)
+    end)
   end
 
   defp maybe_schedule_tick(state) do
@@ -499,4 +488,6 @@ defmodule Pomodoro.PomodoroTimer do
   defp start_task(fun) when is_function(fun, 0) do
     Task.Supervisor.start_child(:pomodoro_task_supervisor, fun)
   end
+
+  defp registry, do: PomodoroUi.registry()
 end

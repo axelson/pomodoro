@@ -27,7 +27,7 @@ defmodule PomodoroUi.TimerComponent do
   @impl Scenic.Scene
   def init(scene, opts, _scenic_opts) do
     pomodoro_timer = Keyword.fetch!(opts, :pomodoro_timer)
-    PomodoroTimer.register(self())
+    PomodoroTimer.register()
 
     graph =
       Graph.build()
