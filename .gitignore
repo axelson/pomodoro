@@ -27,3 +27,5 @@ pomodoro-*.tar
 priv/__scenic/
 priv/sounds/extra
 priv/database.db*
+
+boundary
