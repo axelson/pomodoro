@@ -6,9 +6,6 @@ defmodule Pomodoro do
   alias Pomodoro.Schemas
   alias Pomodoro.PomodoroTimer
 
-  # HACKS
-  def slack_controls_enabled?(), do: false
-
   def record_pomodoro_start(total_seconds, started_at \\ NaiveDateTime.utc_now()) do
     attrs = %{"started_at" => started_at, "total_seconds" => total_seconds}
 

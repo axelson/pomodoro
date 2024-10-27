@@ -44,7 +44,6 @@ defmodule PomodoroUi.Scene.Main do
           pomodoro_timer: pomodoro_timer
         ]
       )
-      |> maybe_add_update_slack_controls(Pomodoro.slack_controls_enabled?())
       |> Launcher.HiddenHomeButton.add_to_graph(on_switch: fn -> send(self(), :reset) end)
 
     schedule_refresh()
@@ -57,14 +56,6 @@ defmodule PomodoroUi.Scene.Main do
       |> push_graph(graph)
 
     {:ok, scene}
-  end
-
-  defp maybe_add_update_slack_controls(graph, false), do: graph
-
-  defp maybe_add_update_slack_controls(graph, true) do
-    graph
-    |> Scenic.Primitives.text("Update Slack", t: {65, 170})
-    |> Scenic.Components.toggle(true, id: :toggle_slack, t: {10, 163})
   end
 
   @impl GenServer
@@ -120,13 +111,6 @@ defmodule PomodoroUi.Scene.Main do
     state = scene.assigns.state
     %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
     :ok = PomodoroTimer.subtract_time(pomodoro_timer_pid, 5 * 60)
-    {:halt, scene}
-  end
-
-  def handle_event({:value_changed, :toggle_slack, value}, _from, scene) do
-    state = scene.assigns.state
-    %State{pomodoro_timer_pid: pomodoro_timer_pid} = state
-    PomodoroTimer.set_slack_enabled_status(pomodoro_timer_pid, value)
     {:halt, scene}
   end
 

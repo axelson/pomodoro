@@ -22,7 +22,6 @@ defmodule Pomodoro.PomodoroTimer do
     :max_limbo_seconds,
     :status,
     :tick_duration,
-    :slack_enabled
   ]
 
   @typedoc """
@@ -82,7 +81,6 @@ defmodule Pomodoro.PomodoroTimer do
       max_limbo_seconds: max_limbo_seconds,
       status: :initial,
       tick_duration: tick_duration,
-      slack_enabled: false
     }
   end
 
@@ -139,10 +137,6 @@ defmodule Pomodoro.PomodoroTimer do
 
   def next(name \\ __MODULE__) do
     GenServer.call(name, :next)
-  end
-
-  def set_slack_enabled_status(name \\ __MODULE__, value) do
-    GenServer.call(name, {:set_slack_enabled_status, value})
   end
 
   @impl GenServer
@@ -234,13 +228,6 @@ defmodule Pomodoro.PomodoroTimer do
 
   def handle_call(:finish, _from, state) do
     state = do_finish(state)
-    {:reply, :ok, state}
-  end
-
-  def handle_call({:set_slack_enabled_status, value}, _from, state) do
-    %State{timer: timer} = state
-    timer = %__MODULE__{timer | slack_enabled: value}
-    state = %State{state | timer: timer}
     {:reply, :ok, state}
   end
 
@@ -357,39 +344,6 @@ defmodule Pomodoro.PomodoroTimer do
     end
   end
 
-  defp update_slack_status(%__MODULE__{slack_enabled: false}), do: nil
-
-  defp update_slack_status(timer) do
-    %__MODULE__{status: status, seconds_remaining: seconds_remaining} = timer
-
-    case status do
-      :initial -> clear_slack_status()
-      :running -> set_slack_status(seconds_remaining)
-      :running_paused -> clear_slack_status()
-      :limbo -> nil
-      :resting -> clear_slack_status()
-      :resting_paused -> nil
-      :finished -> clear_slack_status()
-    end
-  end
-
-  defp set_slack_status(_seconds_remaining) do
-    Task.start(fn ->
-      nil
-      # minutes = ceil(seconds_remaining / 60)
-      # Pomodoro.SlackControls.enable_dnd(minutes)
-      # Pomodoro.SlackControls.set_status("mid-pomodoro", ":tomato:", duration_minutes: minutes)
-    end)
-  end
-
-  defp clear_slack_status do
-    Task.start(fn ->
-      # Pomodoro.SlackControls.disable_dnd()
-      # Pomodoro.SlackControls.clear_status()
-      nil
-    end)
-  end
-
   defp record_pomodoro_start(timer) do
     case Pomodoro.record_pomodoro_start(timer.total_seconds) do
       {:ok, pomodoro_log} ->
@@ -435,7 +389,6 @@ defmodule Pomodoro.PomodoroTimer do
     state = %State{state | timer: timer}
 
     notify_update(state)
-    update_slack_status(timer)
     maybe_schedule_tick(state)
   end
 
@@ -453,7 +406,6 @@ defmodule Pomodoro.PomodoroTimer do
     timer = %__MODULE__{timer | status: new_status}
     state = %State{state | timer_ref: nil, timer: timer}
     notify_update(state)
-    update_slack_status(timer)
 
     state
   end
@@ -482,7 +434,6 @@ defmodule Pomodoro.PomodoroTimer do
       timer = new()
       state = %State{state | timer: timer}
       notify_update(state)
-      update_slack_status(timer)
       state
     else
       Logger.warning("Invalid finish_rest transition attempted")
@@ -508,7 +459,6 @@ defmodule Pomodoro.PomodoroTimer do
 
     play_sound(:rest_start)
     notify_update(state)
-    update_slack_status(timer)
 
     state
   end
@@ -519,7 +469,6 @@ defmodule Pomodoro.PomodoroTimer do
     timer = new(opts)
     state = %State{state | timer: timer}
     notify_update(state)
-    update_slack_status(timer)
     state
   end
 
