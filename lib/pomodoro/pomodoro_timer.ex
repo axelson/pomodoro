@@ -489,5 +489,5 @@ defmodule Pomodoro.PomodoroTimer do
     Task.Supervisor.start_child(:pomodoro_task_supervisor, fun)
   end
 
-  defp registry, do: PomodoroUi.registry()
+  defp registry, do: Pomodoro.registry()
 end

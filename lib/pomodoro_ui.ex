@@ -3,6 +3,4 @@ defmodule PomodoroUi do
   Base of scenic ui
   """
   use Boundary, deps: [Pomodoro, ScenicUtils], exports: []
-
-  def registry, do: :pomodoro_registry
 end

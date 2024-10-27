@@ -1,9 +1,9 @@
-defmodule PomodoroUi.Application do
+defmodule Pomodoro.Application do
   def start(_type, _args) do
     children =
       [
         List.wrap(maybe_start_timer()),
-        {Registry, keys: :duplicate, name: PomodoroUi.registry()},
+        {Registry, keys: :duplicate, name: Pomodoro.registry()},
         Pomodoro.Repo,
         {Task.Supervisor, name: :pomodoro_task_supervisor},
         List.wrap(maybe_start_scenic())
