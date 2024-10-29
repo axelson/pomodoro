@@ -23,6 +23,11 @@ defmodule Pomodoro.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:state_server, "~> 0.4.7"},
+      {:finitomata, "~> 0.26.3"},
+      {:machinery, "~> 1.1.0"},
+      {:fsmx, "~> 0.5.0"},
+      {:flex_test, path: "~/dev/flex_test", only: [:test]},
       dep(:boundary, :hex),
       # dep(:cortex, :path),
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
@@ -32,6 +37,7 @@ defmodule Pomodoro.MixProject do
       {:httpoison, "~> 2.0"},
       dep(:launcher, :github),
       {:sched_ex, "~> 1.1"},
+      {:scenic_widget_contrib, path: "~/dev/forks/scenic-widget-contrib", override: true},
       dep(:scenic, :hex),
       dep(:scenic_driver_local, :hex),
       dep(:scenic_live_reload, :hex),
