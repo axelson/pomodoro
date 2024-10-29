@@ -385,7 +385,7 @@ defmodule Pomodoro.PomodoroTimer do
     # Maybe I should've used a state machine
     timer =
       if status == :initial && timer.status == :running do
-        if timer.total_seconds > 0, do: Pomodoro.SoundPlayer.play(:pomodoro_start)
+        if timer.total_seconds > 0, do: play_sound(:pomodoro_start)
         record_pomodoro_start(timer)
       else
         timer
@@ -498,7 +498,9 @@ defmodule Pomodoro.PomodoroTimer do
   defp can_start_ticking?(:finished), do: false
 
   defp play_sound(sound) do
-    Task.start(fn -> SoundPlayer.play(sound) end)
+    if Application.get_env(:pomodoro, :play_sound?, true) do
+      Task.start(fn -> SoundPlayer.play(sound) end)
+    end
   end
 
   defp start_task(fun) when is_function(fun, 0) do

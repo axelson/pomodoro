@@ -26,6 +26,8 @@ config :pomodoro, Pomodoro.Repo,
   temp_store: :memory,
   pool_size: 1
 
+config :pomodoro, play_sound?: true
+
 case Mix.env() do
   :dev ->
     config :pomodoro, :viewport,
@@ -47,6 +49,9 @@ case Mix.env() do
     config :exsync,
       reload_timeout: 50,
       reload_callback: {ScenicLiveReload, :reload_current_scene, []}
+
+  :test ->
+    config :pomodoro, play_sound?: false
 
   _ ->
     nil
