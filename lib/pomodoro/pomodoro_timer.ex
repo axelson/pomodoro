@@ -56,11 +56,12 @@ defmodule Pomodoro.PomodoroTimer do
         }
 
   defmodule State do
-    defstruct [:timer, :timer_ref, :initial_opts]
+    defstruct [:timer, :timer_ref, :initial_opts, :registry]
 
     @type t :: %__MODULE__{
             initial_opts: list(),
             timer: Pomodoro.PomodoroTimer.t(),
+            registry: pid(),
             timer_ref: reference()
           }
   end
@@ -89,7 +90,15 @@ defmodule Pomodoro.PomodoroTimer do
 
   @impl GenServer
   def init(opts) do
-    state = %State{timer: new(opts), initial_opts: opts}
+    registry = :"pomodoro_timer_registry_#{System.unique_integer([:positive, :monotonic])}"
+
+    {:ok, _registry} =
+      Registry.start_link(
+        keys: :duplicate,
+        name: registry
+      )
+
+    state = %State{timer: new(opts), initial_opts: opts, registry: registry}
     {:ok, state}
   end
 
@@ -98,7 +107,7 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   @deprecated "Use register/2 instead"
-  def register(_pid, _name \\ __MODULE__) do
+  def register(_pid, _name) do
     register()
   end
 
@@ -107,10 +116,10 @@ defmodule Pomodoro.PomodoroTimer do
 
   The calling process will receive a message for each tick
   """
-  def register() do
-    Registry.register(registry(), :main, [])
+  def register(name \\ __MODULE__) do
+    registry = GenServer.call(name, :get_registry)
 
-    :ok
+    Registry.register(registry, :main, [])
   end
 
   def start_ticking(name \\ __MODULE__) do
@@ -149,6 +158,10 @@ defmodule Pomodoro.PomodoroTimer do
   def handle_call(:get_timer, _from, state) do
     %State{timer: timer} = state
     {:reply, timer, state}
+  end
+
+  def handle_call(:get_registry, _from, state) do
+    {:reply, state.registry, state}
   end
 
   def handle_call(:start_ticking, _from, state) do
@@ -319,7 +332,7 @@ defmodule Pomodoro.PomodoroTimer do
     %State{timer: timer} = state
     message = {:pomodoro_timer, timer}
 
-    Registry.dispatch(registry(), :main, fn entries ->
+    Registry.dispatch(state.registry, :main, fn entries ->
       for {pid, _val} <- entries, do: send(pid, message)
     end)
   end
@@ -491,6 +504,4 @@ defmodule Pomodoro.PomodoroTimer do
   defp start_task(fun) when is_function(fun, 0) do
     Task.Supervisor.start_child(:pomodoro_task_supervisor, fun)
   end
-
-  defp registry, do: Pomodoro.registry()
 end

@@ -3,7 +3,6 @@ defmodule Pomodoro.Application do
     children =
       [
         List.wrap(maybe_start_timer()),
-        {Registry, keys: :duplicate, name: Pomodoro.registry()},
         Pomodoro.Repo,
         {Task.Supervisor, name: :pomodoro_task_supervisor},
         List.wrap(maybe_start_scenic())
