@@ -256,29 +256,32 @@ defmodule Pomodoro.PomodoroTimer do
     %State{state | timer_ref: nil}
   end
 
+  defp tick(%State{timer: timer} = state) do
+    %State{state | timer: tick_timer(timer)}
+  end
+
   # HACK: Don't tick when in the initial state
-  defp tick(%__MODULE__{status: :initial} = timer), do: timer
+  defp tick_timer(%__MODULE__{status: :initial} = timer), do: timer
 
-  defp tick(%__MODULE__{status: :finished} = timer) do
+  defp tick_timer(%__MODULE__{status: :finished} = timer) do
     %__MODULE__{extended_seconds: extended_seconds} = timer
     %__MODULE__{timer | extended_seconds: extended_seconds + 1}
   end
 
-  defp tick(%__MODULE__{status: :limbo_finished} = timer) do
+  defp tick_timer(%__MODULE__{status: :limbo_finished} = timer) do
     %__MODULE__{extended_seconds: extended_seconds} = timer
     %__MODULE__{timer | extended_seconds: extended_seconds + 1}
   end
 
-  defp tick(timer) do
+  defp tick_timer(timer) do
     %__MODULE__{seconds_remaining: seconds_remaining} = timer
     %__MODULE__{timer | seconds_remaining: seconds_remaining - 1}
   end
 
   # TODO: refactor, should probably break this up
   defp tick_and_notify(state) do
+    state = tick(state)
     %State{timer: timer} = state
-    timer = tick(timer)
-    state = %State{state | timer: timer}
 
     %__MODULE__{
       seconds_remaining: seconds_remaining,
