@@ -2,22 +2,6 @@ import Config
 
 config :logger, :console, format: "$time $metadata[$level] $message\n"
 
-config :pomodoro, :viewport,
-  name: :main_viewport,
-  size: {800, 480},
-  default_scene: {PomodoroUi.Scene.Main, []},
-  # default_scene:
-  #   {PomodoroUi.Scene.MiniComponent, t: {595, 69}, pomodoro_timer_pid: Pomodoro.PomodoroTimer},
-  drivers: [
-    [
-      module: Scenic.Driver.Local,
-      window: [
-        title: "Pomodoro Timer"
-      ],
-      on_close: :stop_system
-    ]
-  ]
-
 config :scenic, :assets, module: PomodoroUi.Assets
 
 config :tzdata, :autoupdate, :disabled
@@ -44,6 +28,22 @@ config :pomodoro, Pomodoro.Repo,
 
 case Mix.env() do
   :dev ->
+    config :pomodoro, :viewport,
+      name: :main_viewport,
+      size: {800, 480},
+      default_scene: {PomodoroUi.Scene.Main, []},
+      # default_scene:
+      #   {PomodoroUi.Scene.MiniComponent, t: {595, 69}, pomodoro_timer_pid: Pomodoro.PomodoroTimer},
+      drivers: [
+        [
+          module: Scenic.Driver.Local,
+          window: [
+            title: "Pomodoro Timer"
+          ],
+          on_close: :stop_system
+        ]
+      ]
+
     config :exsync,
       reload_timeout: 50,
       reload_callback: {ScenicLiveReload, :reload_current_scene, []}
