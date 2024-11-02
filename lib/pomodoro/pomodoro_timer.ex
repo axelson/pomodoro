@@ -1,4 +1,5 @@
 defmodule Pomodoro.PomodoroTimer do
+  # TODO: Split out the GenServer from the Timer?
   @moduledoc """
   Models a pomodoro timer.
   """
