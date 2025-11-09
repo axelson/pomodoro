@@ -14,6 +14,13 @@ defmodule PomodoroUi.TimerComponent do
     defstruct [:graph, :pomodoro_timer]
   end
 
+  # For usage with widget contrib
+  def start_widget_workbench do
+    WidgetWorkbench.start()
+    opts = [pomodoro_timer: Pomodoro.PomodoroTimer.get_timer()]
+    WidgetWorkbench.Scene.load_component("Pomodoro Timer", PomodoroUi.TimerComponent, opts)
+  end
+
   @doc false
   @impl Scenic.Component
   def validate(opts) do
