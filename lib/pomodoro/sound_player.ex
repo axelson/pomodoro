@@ -1,5 +1,4 @@
 defmodule Pomodoro.SoundPlayer do
-  import HappyWith
   require Logger
 
   defp sound_name(:default), do: "default.wav"
@@ -35,10 +34,9 @@ defmodule Pomodoro.SoundPlayer do
   def get_sound(name) do
     filename = sound_name(name)
 
-    happy_with do
-      {:ok, sound_dir} <- Application.fetch_env(:pomodoro, :sound_directory)
-      path = Path.join([sound_dir, filename])
-      true <- File.exists?(path)
+    with {:ok, sound_dir} <- Application.fetch_env(:pomodoro, :sound_directory),
+      path = Path.join([sound_dir, filename]),
+      true <- File.exists?(path) do
       path
     else
       _ ->

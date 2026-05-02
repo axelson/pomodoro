@@ -31,7 +31,6 @@ defmodule Pomodoro.MixProject do
       # dep(:cortex, :path),
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       # dep(:priv_check, :hex),
-      {:happy_with, "~> 1.0"},
       {:jason, "~> 1.1"},
       {:httpoison, "~> 2.0"},
       dep(:launcher, :path),
