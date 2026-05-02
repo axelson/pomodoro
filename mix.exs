@@ -39,7 +39,7 @@ defmodule Pomodoro.MixProject do
       # {:scenic_widget_contrib, path: "~/dev/forks/scenic-widget-contrib", override: true},
       {:scenic_widget_contrib, github: "axelson/scenic-widget-contrib", branch: "jax", override: true},
       dep(:scenic, :hex),
-      # dep(:scenic_driver_local, :path),
+      dep(:scenic_driver_local, :hex),
       dep(:scenic_live_reload, :hex),
       {:ecto_sqlite3, "~> 0.17"},
       # {:exsync, path: "~/dev/forks/exsync", only: :dev, override: true},
@@ -63,7 +63,7 @@ defmodule Pomodoro.MixProject do
 
   # defp dep(:scenic, :path), do: {:scenic, path: "~/dev/forks/scenic", override: true}
 
-  # defp dep(:scenic_driver_local, :hex), do: {:scenic_driver_local, "~> 0.11.0", only: :dev, override: true}
+  defp dep(:scenic_driver_local, :hex), do: {:scenic_driver_local, "~> 0.11.0", only: :dev, override: true}
 
   # defp dep(:scenic_driver_local, :github),
   #   do:
