@@ -47,7 +47,7 @@ defmodule ScenicUtils.ScenicRendererBehaviour do
 
   @impl GenServer
   def handle_info(msg, scene) do
-    state = scene.assigns.state
+    state = %State{} = scene.assigns.state
     %State{mod: mod, component_state: component_state} = state
 
     case mod.handle_message(msg, component_state) do

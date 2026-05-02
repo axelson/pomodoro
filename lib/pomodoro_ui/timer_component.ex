@@ -91,7 +91,7 @@ defmodule PomodoroUi.TimerComponent do
 
   @impl GenServer
   def handle_info({:pomodoro_timer, pomodoro_timer}, scene) do
-    state = scene.assigns.state
+    state = %State{} = scene.assigns.state
     %State{graph: graph} = state
     graph = ScenicUtils.ScenicRenderer.draw(graph, pomodoro_timer)
     state = %State{state | pomodoro_timer: pomodoro_timer, graph: graph}

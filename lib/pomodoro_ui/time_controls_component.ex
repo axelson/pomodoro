@@ -33,7 +33,7 @@ defmodule PomodoroUi.TimeControlsComponent do
   end
 
   @impl ScenicUtils.ScenicRendererBehaviour
-  def handle_message({:pomodoro_timer, pomodoro_timer}, state) do
+  def handle_message({:pomodoro_timer, pomodoro_timer}, %State{} = state) do
     state = %State{state | pomodoro_timer: pomodoro_timer}
     {:redraw, state}
   end

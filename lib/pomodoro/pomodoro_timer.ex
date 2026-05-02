@@ -155,16 +155,16 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   @impl GenServer
-  def handle_call(:get_timer, _from, state) do
+  def handle_call(:get_timer, _from, %State{} = state) do
     %State{timer: timer} = state
     {:reply, timer, state}
   end
 
-  def handle_call(:get_registry, _from, state) do
+  def handle_call(:get_registry, _from, %State{} = state) do
     {:reply, state.registry, state}
   end
 
-  def handle_call(:start_ticking, _from, state) do
+  def handle_call(:start_ticking, _from, %State{} = state) do
     state = do_start_ticking(state)
     {:reply, :ok, state}
   end
@@ -174,8 +174,8 @@ defmodule Pomodoro.PomodoroTimer do
     {:reply, :ok, state}
   end
 
-  def handle_call({:add_time, seconds}, _from, state) do
-    %State{timer: timer} = state
+  def handle_call({:add_time, seconds}, _from, %State{} = state) do
+    %State{timer: %__MODULE__{} = timer} = state
     %__MODULE__{seconds_remaining: seconds_remaining, total_seconds: total_seconds} = timer
 
     timer = %__MODULE__{
@@ -190,8 +190,8 @@ defmodule Pomodoro.PomodoroTimer do
     {:reply, :ok, state}
   end
 
-  def handle_call({:subtract_time, seconds}, _from, state) do
-    %State{timer: timer} = state
+  def handle_call({:subtract_time, seconds}, _from, %State{} = state) do
+    %State{timer: %__MODULE__{} = timer} = state
     %__MODULE__{seconds_remaining: seconds_remaining, total_seconds: total_seconds} = timer
     new_seconds_remaining = max(seconds_remaining - seconds, 0)
     new_total_seconds = max(total_seconds - seconds, 0)
@@ -219,7 +219,7 @@ defmodule Pomodoro.PomodoroTimer do
     {:reply, :ok, state}
   end
 
-  def handle_call(:next, _from, state) do
+  def handle_call(:next, _from, %State{} = state) do
     %State{timer: timer} = state
     %__MODULE__{status: status} = timer
 
@@ -244,7 +244,7 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   @impl GenServer
-  def handle_info(:tick, state) do
+  def handle_info(:tick, %State{} = state) do
     state = tick_and_notify(state)
 
     state =
@@ -259,7 +259,7 @@ defmodule Pomodoro.PomodoroTimer do
     {:noreply, state}
   end
 
-  defp cancel_timer(state) do
+  defp cancel_timer(%State{} = state) do
     %State{timer_ref: timer_ref} = state
 
     if timer_ref do
@@ -286,15 +286,15 @@ defmodule Pomodoro.PomodoroTimer do
     %__MODULE__{timer | extended_seconds: extended_seconds + 1}
   end
 
-  defp tick_timer(timer) do
+  defp tick_timer(%__MODULE__{} = timer) do
     %__MODULE__{seconds_remaining: seconds_remaining} = timer
     %__MODULE__{timer | seconds_remaining: seconds_remaining - 1}
   end
 
   # TODO: refactor, should probably break this up
-  defp tick_and_notify(state) do
+  defp tick_and_notify(%State{} = state) do
     state = tick(state)
-    %State{timer: timer} = state
+    %State{timer: %__MODULE__{} = timer} = state
 
     %__MODULE__{
       seconds_remaining: seconds_remaining,
@@ -328,7 +328,7 @@ defmodule Pomodoro.PomodoroTimer do
     state
   end
 
-  defp notify_update(state) do
+  defp notify_update(%State{} = state) do
     %State{timer: timer} = state
     message = {:pomodoro_timer, timer}
 
@@ -337,7 +337,7 @@ defmodule Pomodoro.PomodoroTimer do
     end)
   end
 
-  defp maybe_schedule_tick(state) do
+  defp maybe_schedule_tick(%State{} = state) do
     %State{timer: timer, timer_ref: timer_ref} = state
     %__MODULE__{status: status, tick_duration: tick_duration} = timer
 
@@ -364,8 +364,8 @@ defmodule Pomodoro.PomodoroTimer do
       timer
   end
 
-  defp do_start_ticking(state) do
-    %State{timer: timer} = state
+  defp do_start_ticking(%State{} = state) do
+    %State{timer: %__MODULE__{} = timer} = state
     %__MODULE__{status: status} = timer
 
     timer =
@@ -398,8 +398,8 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   defp do_pause(state) do
-    state = cancel_timer(state)
-    %State{timer: timer} = state
+    %State{} = state = cancel_timer(state)
+    %State{timer: %__MODULE__{} = timer} = state
 
     new_status =
       case timer.status do
@@ -415,7 +415,7 @@ defmodule Pomodoro.PomodoroTimer do
     state
   end
 
-  defp do_finish(state) do
+  defp do_finish(%State{} = state) do
     %State{timer: timer} = state
 
     if timer.status in [:running, :limbo, :resting, :resting_paused] do
@@ -446,8 +446,8 @@ defmodule Pomodoro.PomodoroTimer do
     end
   end
 
-  defp do_rest(state) do
-    %State{timer: timer} = state
+  defp do_rest(%State{} = state) do
+    %State{timer: %__MODULE__{} = timer} = state
     new_status = :resting
     timer = %__MODULE__{timer | status: new_status, seconds_remaining: 0, extended_seconds: 0}
     state = %State{state | timer: timer}
@@ -469,7 +469,7 @@ defmodule Pomodoro.PomodoroTimer do
   end
 
   defp do_reset(state, opts) do
-    state = cancel_timer(state)
+    state = %State{} = cancel_timer(state)
     play_sound(:reset)
     timer = new(opts)
     state = %State{state | timer: timer}
