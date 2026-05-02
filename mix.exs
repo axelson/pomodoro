@@ -33,9 +33,11 @@ defmodule Pomodoro.MixProject do
       # dep(:priv_check, :hex),
       {:jason, "~> 1.1"},
       {:httpoison, "~> 2.0"},
-      dep(:launcher, :path),
+      dep(:launcher, :github),
       {:sched_ex, "~> 1.1"},
-      {:scenic_widget_contrib, path: "~/dev/forks/scenic-widget-contrib", override: true},
+      # Was on text_pad_wip 9e3846aea2642e01e90d86675466c9fb3eeca615
+      # {:scenic_widget_contrib, path: "~/dev/forks/scenic-widget-contrib", override: true},
+      {:scenic_widget_contrib, github: "axelson/scenic-widget-contrib", branch: "jax", override: true},
       dep(:scenic, :hex),
       # dep(:scenic_driver_local, :path),
       dep(:scenic_live_reload, :hex),
@@ -48,42 +50,39 @@ defmodule Pomodoro.MixProject do
   end
 
   defp dep(:launcher, :github), do: {:launcher, github: "axelson/scenic_launcher"}
-  defp dep(:launcher, :path), do: {:launcher, path: "~/dev/launcher"}
+  # defp dep(:launcher, :path), do: {:launcher, path: "~/dev/launcher"}
 
   defp dep(:boundary, :hex), do: {:boundary, "~> 0.8"}
-  defp dep(:boundary, :github), do: {:boundary, github: "sasa1977/boundary"}
-  defp dep(:boundary, :path), do: {:boundary, path: "~/dev/forks/boundary"}
+  # defp dep(:boundary, :github), do: {:boundary, github: "sasa1977/boundary"}
+  # defp dep(:boundary, :path), do: {:boundary, path: "~/dev/forks/boundary"}
 
   defp dep(:scenic, :hex), do: {:scenic, "~> 0.11", override: true}
 
-  defp dep(:scenic, :github),
-    do: {:scenic, github: "boydm/scenic", branch: "v0.11", override: true}
+  # defp dep(:scenic, :github),
+  #   do: {:scenic, github: "boydm/scenic", branch: "v0.11", override: true}
 
-  defp dep(:scenic, :path), do: {:scenic, path: "~/dev/forks/scenic", override: true}
+  # defp dep(:scenic, :path), do: {:scenic, path: "~/dev/forks/scenic", override: true}
 
-  defp dep(:scenic_driver_local, :hex), do: {:scenic_driver_local, "~> 0.11.0", only: :dev, override: true}
+  # defp dep(:scenic_driver_local, :hex), do: {:scenic_driver_local, "~> 0.11.0", only: :dev, override: true}
 
-  defp dep(:scenic_driver_local, :github),
-    do:
-      {:scenic_driver_local,
-       github: "ScenicFramework/scenic_driver_local", branch: "main", only: :dev, override: true}
+  # defp dep(:scenic_driver_local, :github),
+  #   do:
+  #     {:scenic_driver_local,
+  #      github: "ScenicFramework/scenic_driver_local", branch: "main", only: :dev, override: true}
 
-  defp dep(:scenic_driver_local, :path),
-    do:
-      {:scenic_driver_local, path: "~/dev/forks/scenic_driver_local", only: :dev, override: true}
+  # defp dep(:scenic_driver_local, :path),
+  #   do:
+  #     {:scenic_driver_local, path: "~/dev/forks/scenic_driver_local", only: :dev, override: true}
 
   defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.3", only: :dev}
 
-  defp dep(:scenic_live_reload, :path),
-    do: {:scenic_live_reload, path: "~/dev/scenic_live_reload", only: :dev}
+  # defp dep(:scenic_live_reload, :path),
+  #   do: {:scenic_live_reload, path: "~/dev/scenic_live_reload", only: :dev}
 
-  defp dep(:cortex, :path), do: {:cortex, path: "~/dev/forks/cortex", only: [:dev, :test]}
-  defp dep(:cortex, :hex), do: {:cortex, "~> 0.5", only: [:dev, :test]}
+  # defp dep(:priv_check, :hex), do: {:priv_check, "~> 0.2", only: [:dev, :test], runtime: false}
 
-  defp dep(:priv_check, :hex), do: {:priv_check, "~> 0.2", only: [:dev, :test], runtime: false}
-
-  defp dep(:priv_check, :path),
-    do: {:priv_check, path: "~/dev/priv_check", only: [:dev, :test], runtime: false}
+  # defp dep(:priv_check, :path),
+  #   do: {:priv_check, path: "~/dev/priv_check", only: [:dev, :test], runtime: false}
 
   defp compilers(:prod), do: [:boundary] ++ Mix.compilers()
   # defp compilers(_), do: [:boundary, :priv_check] ++ Mix.compilers()
